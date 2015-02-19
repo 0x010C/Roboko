@@ -6,6 +6,7 @@
 
 import httplib;
 import time;
+import calendar;
 import os;
 import sys;
 from feedparser import parse;
@@ -21,12 +22,12 @@ password = "";
 server = "holmes.freenode.net";
 port = 6667;
 
-wait = 60;
-cat = "https://fr.wikipedia.org/w/api.php?hidebots=1&days=7&limit=50&target=Catégorie:Portail:Animation+et+bande+dessinée+asiatiques/Articles+liés&hidewikidata=1&action=feedrecentchanges&feedformat=atom&from=";
+wait = 30;
+cat = "https://fr.wikipedia.org/w/api.php?hidebots=1&days=7&limit=50&target=Catégorie:Portail:Animation+et+bande+dessinée+asiatiques/Articles+liés&hidewikidata=1&action=feedrecentchanges&feedformat=atom";
 page = "";
 
-old_timestamp1 = time.strftime("%Y%m%d%H%M%S", time.gmtime());
-old_timestamp2 = time.strftime("%Y%m%d%H%M%S", time.gmtime());
+old_timestamp1 = calendar.timegm(time.gmtime());
+old_timestamp2 = calendar.timegm(time.gmtime());
 
 
 # Boucle principale + Gestion de la lecture et de l'écriture IRC
@@ -62,7 +63,7 @@ class mybot(ircbot.SingleServerIRCBot):
 	def checker(self):
 		self.check_new_article(cat);
 		#check_new_section(self, bistro);
-		self.saveServ.execute_delayed(wait/4, self.checker);
+		self.saveServ.execute_delayed(wait, self.checker);
 	
 	def jisho(self, message):
 		self.send(chan, "Traduction de #" + message + "#");
@@ -70,18 +71,19 @@ class mybot(ircbot.SingleServerIRCBot):
 	# Les checkers
 	def check_new_article(self, cat_link):
 		global old_timestamp1;
-		timestamp1 = time.strftime("%Y%m%d%H%M%S", time.gmtime());
-		entries = get_entries(cat_link + old_timestamp1);
+		print "\n-->check with " + str(int(old_timestamp1)) + "\n";
+		timestamp1 = calendar.timegm(time.gmtime());
+		entries = get_new_entries(cat_link, old_timestamp1);
 		for item in entries:
 			if re.search("\n<p><b>Nouvelle page</b></p>", item.summary):
 				tmp = u"- Nouvel article : [["+ item.title + u"]] - " + article_link(item.title);
-				print tmp;
-				self.act(chan, tmp);
+				print old_timestamp1 + " : " + tmp;
+				self.act(chan, tmp.encode('utf-8'));
 				time.sleep(2);
 			else:
 				tmp = u"- Modification de l'article [["+ item.title + u"]] - " + article_link(item.title);
 				print tmp;
-				self.act(chan, tmp);
+				self.act(chan, tmp.encode('utf-8'));
 				time.sleep(2);
 		old_timestamp1 = timestamp1;
 
@@ -90,10 +92,19 @@ class mybot(ircbot.SingleServerIRCBot):
 def timestampisation(date):
 	return time.mktime(time.strptime(date,"%Y-%m-%dT%H:%M:%SZ")) + (2*60*60);
 
+
 # Recuperation de feed rss
 def get_entries(link):
 	feed = parse(link);
-	return feed['entries'];
+	return feed;
+
+def get_new_entries(link, old_timestamp):
+	feed = get_entries(link);
+	entries = [];
+	for item in feed['entries']:
+		if int(timestampisation(item.updated)-3600) > int(old_timestamp):
+			entries.append(item);
+	return entries;
 
 # Divers
 def article_link(link):
