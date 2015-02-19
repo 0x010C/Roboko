@@ -50,6 +50,16 @@ class mybot(ircbot.SingleServerIRCBot):
 		print "Traduction de #" + message + "#";
 
 
+# Recuperation de feed rss
+def get_entries(link):
+	feed = parse(link);
+	return feed;
+
+def get_last_entrie(link):
+	feed = get_entries(link);
+	return feed['entries'][0];
+
+
 # Main
 def main():
 	mybot().start();
