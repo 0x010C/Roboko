@@ -33,11 +33,12 @@ old_timestamp2 = calendar.timegm(time.gmtime());
 # Boucle principale + Gestion de la lecture et de l'écriture IRC
 class mybot(ircbot.SingleServerIRCBot):
 	def __init__(self):
-		ircbot.SingleServerIRCBot.__init__(self, [(server, port)],pseudo, "Projet abda sur wikipedia francophone");
+		ircbot.SingleServerIRCBot.__init__(self, [(server, port)],pseudo, "Roboko v1.03");
 	
 	def on_welcome(self, serv, ev):
 		self.saveServ = serv;
 		self.send("nickserv", "identify " + password);
+		time.sleep(10);
 		serv.join(chan);
 		self.checker();
 	
