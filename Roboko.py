@@ -16,13 +16,13 @@ import re;
 import unicodedata;
 
 #Paramètres
-chan = "##test42";
-pseudo = "kiwi_0x010D";
+chan = "##abda";
+pseudo = "Roboko";
 password = "";
 server = "holmes.freenode.net";
 port = 6667;
 
-wait = 30;
+wait = 60;
 cat = "https://fr.wikipedia.org/w/api.php?hidebots=1&days=7&limit=50&target=Catégorie:Portail:Animation+et+bande+dessinée+asiatiques/Articles+liés&hidewikidata=1&action=feedrecentchanges&feedformat=atom";
 page = "https://fr.wikipedia.org/w/index.php?title=Discussion_Projet:Animation_et_bande_dessin%C3%A9e_asiatiques&feed=atom&action=history";
 
@@ -37,14 +37,21 @@ class mybot(ircbot.SingleServerIRCBot):
 	
 	def on_welcome(self, serv, ev):
 		self.saveServ = serv;
+		self.send("nickserv", "identify " + password);
 		serv.join(chan);
 		self.checker();
+	
+	def on_privnotice(self, serv, ev):
+		print "#" + irclib.nm_to_n(ev.source()) + "# --> " + ev.arguments()[0];
 	
 	def on_pubmsg(self, serv, ev):
 		author = irclib.nm_to_n(ev.source());
 		canal = ev.target();
 		message = ev.arguments()[0];
 		print author + " --> " + message;
+		if re.search("\[\[.+\]\]", message):
+			print article_link(re.split("\[\[(.+)\]\]", message)[1].strip());
+			self.send(chan, article_link(re.split("\[\[(.+)\]\]", message)[1].strip()));
 		if re.search("^!jisho .+", message):
 			self.jisho(message[7:]);
 	
@@ -80,12 +87,12 @@ class mybot(ircbot.SingleServerIRCBot):
 				print old_timestamp1 + " : " + tmp;
 				self.act(chan, tmp.encode('utf-8'));
 				time.sleep(2);
-			else:
-				if isIp(item.author):
-					tmp = u"- Modification de [["+ item.title + u"]] par " + item.author + u" - https:" + item.id;
-					print tmp;
-					self.act(chan, tmp.encode('utf-8'));
-					time.sleep(2);
+#			else:
+#				if isIp(item.author):
+#					tmp = u"- Modification de [["+ item.title + u"]] par " + item.author + u" - https:" + item.id;
+#					print tmp;
+#					self.act(chan, tmp.encode('utf-8'));
+#					time.sleep(2);
 		old_timestamp1 = timestamp1;
 		
 	def check_new_section(self, page_link):
