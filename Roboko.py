@@ -106,7 +106,7 @@ class mybot(ircbot.SingleServerIRCBot):
 			conn.request("GET", item.id[24:]);
 			print item.id[24:];
 			if re.search('<td class="diff-addedline"><div>==.+==</div></td>', conn.getresponse().read()):
-				tmp = u"- Nouveau sujet sur le Manga Café :-) https://fr.wikipedia.org/wiki/Discussion_Projet:Animation_et_bande_dessinée_asiatiques#footer";
+				tmp = u"- Nouveau sujet sur le Manga Café : https://fr.wikipedia.org/wiki/Discussion_Projet:Animation_et_bande_dessinée_asiatiques#footer";
 				print tmp;
 				self.act(chan, tmp.encode('utf-8'));
 				time.sleep(2);
