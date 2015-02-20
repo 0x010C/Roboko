@@ -14,8 +14,10 @@ import irclib;
 import ircbot;
 import re;
 import unicodedata;
+import urllib;
 
 #Paramètres
+version = "1.04"
 chan = "##abda";
 pseudo = "Roboko";
 password = "";
@@ -33,7 +35,7 @@ old_timestamp2 = calendar.timegm(time.gmtime());
 # Boucle principale + Gestion de la lecture et de l'écriture IRC
 class mybot(ircbot.SingleServerIRCBot):
 	def __init__(self):
-		ircbot.SingleServerIRCBot.__init__(self, [(server, port)],pseudo, "Roboko v1.03");
+		ircbot.SingleServerIRCBot.__init__(self, [(server, port)],pseudo, "Roboko ");
 	
 	def on_welcome(self, serv, ev):
 		self.saveServ = serv;
@@ -133,7 +135,7 @@ def get_new_entries(link, old_timestamp):
 
 # Divers
 def article_link(link):
-	return "https://fr.wikipedia.org/wiki/" + link.replace(" ", "_");
+	return "https://fr.wikipedia.org/wiki/" + urllib.quote_plus(link.replace(" ", "_"));
 
 def isIp(name):
 	if re.search("^[0-9]{1,3}.[0-9]{1,3}.[0-9]{1,3}.[0-9]{1,3}$", name):
