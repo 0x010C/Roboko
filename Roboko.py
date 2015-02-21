@@ -21,7 +21,7 @@ version = "1.06"
 chan = "##abda";
 pseudo = "Roboko";
 password = "";
-server = "holmes.freenode.net";
+server = "kornbluth.freenode.net";
 port = 6667;
 
 wait = 60;
