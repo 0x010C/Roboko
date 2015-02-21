@@ -17,9 +17,9 @@ import unicodedata;
 import urllib;
 
 #Paramètres
-version = "1.06"
-chan = "##abda";
-pseudo = "Roboko";
+version = "1.07"
+chan = "";
+pseudo = "";
 password = "";
 server = "holmes.freenode.net";
 port = 6667;
@@ -39,8 +39,9 @@ class mybot(ircbot.SingleServerIRCBot):
 	
 	def on_welcome(self, serv, ev):
 		self.saveServ = serv;
-		self.send("nickserv", "identify " + password);
-		time.sleep(10);
+		if password != "":
+			self.send("nickserv", "identify " + password);
+			time.sleep(10);
 		serv.join(chan);
 		self.checker();
 	
@@ -146,8 +147,42 @@ def isIp(name):
 		else:
 			return False;
 
+# Args
+def parse_config_file():
+	global chan;
+	global pseudo;
+	global password;
+	if(os.path.isfile("Roboko.conf") == False):
+		return;
+	fichier = open("Roboko.conf", "r");
+	contenu = fichier.read();
+	fichier.close();
+	for line in contenu.split("\n"):
+		if re.search("^[Cc]han:", line):
+			chan = line[5:];
+		if re.search("^[Pp]seudo:", line):
+			pseudo = line[7:];
+		if re.search("^[Pp]assword:", line):
+			password = line[9:];
+
+def get_args():
+	global chan;
+	global pseudo;
+	global password;
+	parse_config_file();
+	if chan == "":
+		print "Chan";
+		print "> ",;chan = sys.stdin.readline().split("\n")[0];
+	if pseudo == "":
+		print "Pseudo";
+		print "> ",;pseudo = sys.stdin.readline().split("\n")[0];
+	if password == "":
+		print "Password";
+		print "> ",;password = sys.stdin.readline().split("\n")[0];
+
 # Main
 def main():
+	get_args();
 	mybot().start();
 
 main();
