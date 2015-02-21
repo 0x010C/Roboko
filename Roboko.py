@@ -17,7 +17,7 @@ import unicodedata;
 import urllib;
 
 #Paramètres
-version = "1.04"
+version = "1.06"
 chan = "##abda";
 pseudo = "Roboko";
 password = "";
@@ -35,7 +35,7 @@ old_timestamp2 = calendar.timegm(time.gmtime());
 # Boucle principale + Gestion de la lecture et de l'écriture IRC
 class mybot(ircbot.SingleServerIRCBot):
 	def __init__(self):
-		ircbot.SingleServerIRCBot.__init__(self, [(server, port)],pseudo, "Roboko ");
+		ircbot.SingleServerIRCBot.__init__(self, [(server, port)],pseudo, "Roboko v"+version);
 	
 	def on_welcome(self, serv, ev):
 		self.saveServ = serv;
@@ -109,7 +109,7 @@ class mybot(ircbot.SingleServerIRCBot):
 			print item.id[24:];
 			if re.search('<td class="diff-addedline"><div>==.+==</div></td>', conn.getresponse().read()):
 				tmp = u"- Nouveau sujet sur le Manga Café : https://fr.wikipedia.org/wiki/Discussion_Projet:Animation_et_bande_dessinée_asiatiques#footer";
-				print tmp;
+				print tmp.encode('utf-8');
 				self.act(chan, tmp.encode('utf-8'));
 				time.sleep(2);
 		old_timestamp2 = timestamp2;
