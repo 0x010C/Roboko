@@ -17,14 +17,14 @@ import unicodedata;
 import urllib;
 
 #Paramètres
-version = "1.07"
+version = "1.08"
 chan = "";
 pseudo = "";
 password = "";
 server = "kornbluth.freenode.net";
 port = 6667;
 
-wait = 60;
+wait = 300;
 cat = "https://fr.wikipedia.org/w/api.php?hidebots=1&days=7&limit=50&target=Catégorie:Portail:Animation+et+bande+dessinée+asiatiques/Articles+liés&hidewikidata=1&action=feedrecentchanges&feedformat=atom";
 page = "https://fr.wikipedia.org/w/index.php?title=Discussion_Projet:Animation_et_bande_dessin%C3%A9e_asiatiques&feed=atom&action=history";
 
