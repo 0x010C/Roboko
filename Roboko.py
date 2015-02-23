@@ -17,7 +17,7 @@ import unicodedata;
 import urllib;
 
 #Paramètres
-version = "1.09"
+version = "1.10"
 chan = "";
 pseudo = "";
 password = "";
@@ -36,7 +36,7 @@ old_timestamp2 = calendar.timegm(time.gmtime());
 class mybot(ircbot.SingleServerIRCBot):
 	def __init__(self):
 		ircbot.SingleServerIRCBot.__init__(self, [(server, port)],pseudo, "Roboko v"+version);
-	
+
 	def on_welcome(self, serv, ev):
 		self.saveServ = serv;
 		if password != "":
@@ -44,21 +44,22 @@ class mybot(ircbot.SingleServerIRCBot):
 			time.sleep(10);
 		serv.join(chan);
 		self.checker();
-	
+
 	def on_privnotice(self, serv, ev):
 		print "#" + irclib.nm_to_n(ev.source()) + "# --> " + ev.arguments()[0];
-	
+
 	def on_pubmsg(self, serv, ev):
 		author = irclib.nm_to_n(ev.source());
 		canal = ev.target();
 		message = ev.arguments()[0];
-		print author + " --> " + message;
-		if re.search("\[\[.+\]\]", message):
-			print article_link(re.split("\[\[(.+)\]\]", message)[1].strip());
-			self.send(chan, article_link(re.split("\[\[(.+)\]\]", message)[1].strip()));
-		if re.search("^!jisho .+", message):
-			self.jisho(message[7:]);
-	
+		self.command(author, canal, message);
+
+	def on_action(self, serv, ev):
+		author = irclib.nm_to_n(ev.source());
+		canal = ev.target();
+		message = ev.arguments()[0];
+		self.command(author, canal, message);
+
 	def send(self, to, message):
 		try:
 			self.saveServ.privmsg(to, message);
@@ -70,8 +71,30 @@ class mybot(ircbot.SingleServerIRCBot):
 			self.saveServ.action(to, message);
 		except:
 			print u"except";
-	
+
+	def command(self, author, canal, message):
+		print author + " --> " + message;
+		if re.search("^!help", message):
+			self.send(author, "Roboko, bot irc pour le chan du Projet:Animation et bande dessinée asiatiques sur la Wikipédia francophone (##abda)");
+			time.sleep(1);
+			self.send(author, " ");
+			self.send(author, "Commandes disponibles :");
+			self.send(author, "!help : affiche ce message d'aide");
+			self.send(author, "[[lien interne WP]] : traduit un lien interne en url");
+			self.send(author, "Annonce les nouveaux articles du Portail:ABDA");
+			self.send(author, "Annonce les nouveaux sujets sur le Manga café");
+			time.sleep(1);
+			self.send(author, " ");
+			self.send(author, "Roboko v"+version+", développé par 0x010C en python2.7 d'après les idées de Thibaut120094");
+		if re.search("\[\[.+\]\]", message):
+			print article_link(re.split("\[\[(.+)\]\]", message)[1].strip());
+			self.send(canal, article_link(re.split("\[\[(.+)\]\]", message)[1].strip()));
+		if re.search("^!jisho .+", message):
+			self.jisho(message[7:]);
+		
+
 	def checker(self):
+		print "### Checker";
 		self.check_new_article(cat);
 		self.check_new_section(page);
 		self.saveServ.execute_delayed(wait, self.checker);
@@ -82,7 +105,6 @@ class mybot(ircbot.SingleServerIRCBot):
 	# Les checkers
 	def check_new_article(self, cat_link):
 		global old_timestamp1;
-		print "\n-->check at " + str(int(old_timestamp1)) + "\n";
 		timestamp1 = calendar.timegm(time.gmtime());
 		entries = get_new_entries(cat_link, old_timestamp1);
 		for item in entries:
@@ -101,7 +123,6 @@ class mybot(ircbot.SingleServerIRCBot):
 		
 	def check_new_section(self, page_link):
 		global old_timestamp2;
-		print "\n==#check at " + str(int(old_timestamp2)) + "\n";
 		timestamp2 = calendar.timegm(time.gmtime());
 		entries = get_new_entries(page_link, old_timestamp2);
 		conn = httplib.HTTPSConnection("fr.wikipedia.org");
