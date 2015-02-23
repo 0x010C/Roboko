@@ -17,7 +17,7 @@ import unicodedata;
 import urllib;
 
 #Paramètres
-version = "1.10"
+version = "1.11"
 chan = "";
 pseudo = "";
 password = "";
@@ -129,11 +129,14 @@ class mybot(ircbot.SingleServerIRCBot):
 		for item in entries:
 			conn.request("GET", item.id[24:]);
 			print item.id[24:];
-			if re.search('<td class="diff-addedline"><div>==.+==</div></td>', conn.getresponse().read()):
-				tmp = u"- Nouveau sujet sur le Manga Café : https://fr.wikipedia.org/wiki/Discussion_Projet:Animation_et_bande_dessinée_asiatiques#footer";
-				print tmp.encode('utf-8');
-				self.act(chan, tmp.encode('utf-8'));
-				time.sleep(2);
+			result = re.findall('<td class="diff-addedline"><div>==(.+)==.*</div></td>', conn.getresponse().read());
+			if len(result) > 0:
+				if result[0][0] != '=':
+					result[0] = result[0].strip();
+					tmp = u"- Nouveau sujet sur le Manga Café par "+item.author+u" : https://fr.wikipedia.org/wiki/Discussion_Projet:Animation_et_bande_dessinée_asiatiques#"+urllib.quote_plus(result[0].replace(" ", "_"));
+					print tmp.encode('utf-8');
+					self.act(chan, tmp.encode('utf-8'));
+					time.sleep(2);
 		old_timestamp2 = timestamp2;
 
 
