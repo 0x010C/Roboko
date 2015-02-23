@@ -17,7 +17,7 @@ import unicodedata;
 import urllib;
 
 #Paramètres
-version = "1.08"
+version = "1.09"
 chan = "";
 pseudo = "";
 password = "";
@@ -87,13 +87,13 @@ class mybot(ircbot.SingleServerIRCBot):
 		entries = get_new_entries(cat_link, old_timestamp1);
 		for item in entries:
 			if re.search("\n<p><b>Nouvelle page</b></p>", item.summary):
-				tmp = u"- Nouvel article : [["+ item.title + u"]] - " + article_link(item.title);
+				tmp = u"- Nouvel article : [["+ item.title + u"]] - " + article_link(item.title.encode('utf-8'));
 				print str(old_timestamp1) + " : " + tmp;
 				self.act(chan, tmp.encode('utf-8'));
 				time.sleep(2);
 #			else:
 #				if isIp(item.author):
-#					tmp = u"- Modification de [["+ item.title + u"]] par " + item.author + u" - https:" + item.id;
+#					tmp = u"- Modification de [["+ item.title + u"]] par " + item.author + u" - " + article_link(item.title.encode('utf-8'));
 #					print tmp;
 #					self.act(chan, tmp.encode('utf-8'));
 #					time.sleep(2);
