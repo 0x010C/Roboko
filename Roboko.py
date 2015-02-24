@@ -17,7 +17,7 @@ import unicodedata;
 import urllib;
 
 #Paramètres
-version = "1.11"
+version = "1.12"
 chan = "";
 pseudo = "";
 password = "";
@@ -142,7 +142,7 @@ class mybot(ircbot.SingleServerIRCBot):
 
 # Gestion du temps
 def timestampisation(date):
-	return time.mktime(time.strptime(date,"%Y-%m-%dT%H:%M:%SZ")) + (2*60*60);
+	return time.mktime(time.strptime(date,"%Y-%m-%dT%H:%M:%SZ"));
 
 
 # Recuperation de feed rss
@@ -154,7 +154,7 @@ def get_new_entries(link, old_timestamp):
 	feed = get_entries(link);
 	entries = [];
 	for item in feed:
-		if int(timestampisation(item.updated)-3600) > int(old_timestamp):
+		if int(timestampisation(item.updated)) > int(old_timestamp):
 			entries.append(item);
 	return entries;
 
