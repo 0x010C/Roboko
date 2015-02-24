@@ -21,7 +21,7 @@ version = "1.12"
 chan = "";
 pseudo = "";
 password = "";
-server = "kornbluth.freenode.net";
+server = "verne.freenode.net";
 port = 6667;
 
 wait = 300;
