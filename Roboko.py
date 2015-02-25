@@ -110,7 +110,6 @@ class mybot(ircbot.SingleServerIRCBot):
 		for item in entries:
 			if re.search("\n<p><b>Nouvelle page</b></p>", item.summary):
 				tmp = u"- Nouvel article : [["+ item.title + u"]] - " + article_link(item.title.encode('utf-8'));
-				print str(old_timestamp1) + " : " + tmp;
 				self.act(chan, tmp.encode('utf-8'));
 				time.sleep(2);
 #			else:
