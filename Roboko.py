@@ -17,7 +17,7 @@ import unicodedata;
 import urllib;
 
 #Paramètres
-version = "1.12"
+version = "1.13"
 chan = "";
 pseudo = "";
 password = "";
@@ -109,7 +109,7 @@ class mybot(ircbot.SingleServerIRCBot):
 		entries = get_new_entries(cat_link, old_timestamp1);
 		for item in entries:
 			if re.search("\n<p><b>Nouvelle page</b></p>", item.summary):
-				tmp = u"- Nouvel article : [["+ item.title + u"]] - " + article_link(item.title.encode('utf-8'));
+				tmp = u"– Nouvel article : [["+ item.title + u"]] – " + article_link(item.title.encode('utf-8'));
 				self.act(chan, tmp.encode('utf-8'));
 				time.sleep(2);
 #			else:
@@ -132,7 +132,7 @@ class mybot(ircbot.SingleServerIRCBot):
 			if len(result) > 0:
 				if result[0][0] != '=':
 					result[0] = result[0].strip();
-					tmp = u"- Nouveau sujet sur le Manga Café par "+item.author+u" : https://fr.wikipedia.org/wiki/Discussion_Projet:Animation_et_bande_dessinée_asiatiques#"+urllib.quote_plus(result[0].replace(" ", "_"));
+					tmp = u"– Nouveau sujet sur le Manga Café par "+item.author+u" : https://fr.wikipedia.org/wiki/Discussion_Projet:Animation_et_bande_dessinée_asiatiques#"+urllib.quote_plus(result[0].replace(" ", "_"));
 					print tmp.encode('utf-8');
 					self.act(chan, tmp.encode('utf-8'));
 					time.sleep(2);
