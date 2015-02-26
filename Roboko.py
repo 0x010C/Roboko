@@ -89,8 +89,8 @@ class mybot(ircbot.SingleServerIRCBot):
 		if re.search("\[\[.+\]\]", message):
 			print article_link(re.split("\[\[(.+)\]\]", message)[1].strip());
 			self.send(canal, article_link(re.split("\[\[(.+)\]\]", message)[1].strip()));
-		if re.search("^!jisho .+", message):
-			self.jisho(message[7:]);
+#		if re.search("^!jisho .+", message):
+#			self.send(canal, self.jisho(message[7:]));
 		
 
 	def checker(self):
@@ -98,9 +98,7 @@ class mybot(ircbot.SingleServerIRCBot):
 		self.check_new_article(cat);
 		self.check_new_section(page);
 		self.saveServ.execute_delayed(wait, self.checker);
-	
-	def jisho(self, message):
-		self.send(chan, "Traduction de #" + message + "#");
+
 
 	# Les checkers
 	def check_new_article(self, cat_link):
@@ -207,6 +205,36 @@ def get_args():
 # Main
 def main():
 	get_args();
-	mybot().start();
+	while True:
+		mybot().start();
+		time.sleep(30);
 
-main();
+#main();
+
+
+
+
+def jisho(message):
+	conn = httplib.HTTPConnection("tangorin.com");
+	conn.request("GET", "/general/"+urllib.quote_plus(message));
+	result = re.findall('<div class="entry"><a class="btn btn-link entry-menu" onclick="entryMenu\(this,\{\n([\s\S]+)</div>', conn.getresponse().read())[0];
+	result = result.split("\">")[0].split("\n")[2:6];
+	for line in result:
+		line = line.split(":")[1];
+		print line;
+	kanji = re.findall("'(.*)'",result[0])[0];
+	kana = re.findall("'(.*)'",result[1])[0].split("・")[0];
+	trad = re.findall("'(.*)'",result[3])[0].replace("<ol>", "").replace("</ol>", "").replace("</li><li>", " - ").replace("<li>", "").replace("</li>", "");
+	output = "";
+	if kanji == "":
+		output = kana + " --> " + trad;
+	else:
+		output = kanji + "[" + kana + "] --> " + trad;
+
+	return output;
+
+print(jisho("senpai"));
+
+
+
+
