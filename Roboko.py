@@ -17,12 +17,13 @@ import unicodedata;
 import urllib;
 
 #Paramètres
-version = "1.13"
+version = "1.15"
 chan = "";
 pseudo = "";
 password = "";
 server = "verne.freenode.net";
 port = 6667;
+converttable = [];
 
 wait = 300;
 cat = "https://fr.wikipedia.org/w/api.php?hidebots=1&days=7&limit=50&target=Catégorie:Portail:Animation+et+bande+dessinée+asiatiques/Articles+liés&hidewikidata=1&action=feedrecentchanges&feedformat=atom";
@@ -80,6 +81,7 @@ class mybot(ircbot.SingleServerIRCBot):
 			self.send(author, " ");
 			self.send(author, "Commandes disponibles :");
 			self.send(author, "!help : affiche ce message d'aide");
+			self.send(author, "!jisho : tranduit et transcrit un mot japonais");
 			self.send(author, "[[lien interne WP]] : traduit un lien interne en url");
 			self.send(author, "Annonce les nouveaux articles du Portail:ABDA");
 			self.send(author, "Annonce les nouveaux sujets sur le Manga café");
@@ -89,8 +91,8 @@ class mybot(ircbot.SingleServerIRCBot):
 		if re.search("\[\[.+\]\]", message):
 			print article_link(re.split("\[\[(.+)\]\]", message)[1].strip());
 			self.send(canal, article_link(re.split("\[\[(.+)\]\]", message)[1].strip()));
-#		if re.search("^!jisho .+", message):
-#			self.send(canal, self.jisho(message[7:]));
+		if re.search("^!jisho .+", message):
+			self.send(canal, self.jisho(message[7:]));
 		
 
 	def checker(self):
@@ -135,6 +137,28 @@ class mybot(ircbot.SingleServerIRCBot):
 					self.act(chan, tmp.encode('utf-8'));
 					time.sleep(2);
 		old_timestamp2 = timestamp2;
+
+	def jisho(self, message):
+		conn = httplib.HTTPConnection("tangorin.com");
+		conn.request("GET", "/general/"+urllib.quote_plus(message));
+		result = re.findall('<div class="entry"><a class="btn btn-link entry-menu" onclick="entryMenu\(this,\{\n([\s\S]+)</div>', conn.getresponse().read());
+		if len(result) > 0:
+			result = result[0].split("\">")[0].split("\n")[2:6];
+			for line in result:
+				line = line.split(":")[1];
+			kanji = re.findall("'(.*)'",result[0])[0];
+			kana = re.findall("'(.*)'",result[1])[0].split("・")[0];
+			trad = re.findall("'(.*)'",result[3])[0].replace("<ol>", "").replace("</ol>", "").replace("</li><li>", " - ").replace("<li>", "").replace("</li>", "");
+
+			output = kanji + "[" + kana + ", " + kana2romaji(kana) + "] --> " + trad;
+			return output.encode('utf-8');
+		else:
+			trad = kana2romaji(message);
+			if len(trad) > 0:
+				return "Introuvable, tentative de transcription : " + trad;
+			else:
+				return "Introuvable";
+
 
 
 # Gestion du temps
@@ -201,39 +225,45 @@ def get_args():
 		print "Password";
 		print "> ",;password = sys.stdin.readline().split("\n")[0];
 
+
+
+def get_converttable():
+	if os.path.isfile("kana.list") == False:
+		print "kana.list introuvable !";
+		sys.exit();
+	fichier = open("kana.list", "r");
+	contenu = fichier.read();
+	lines = contenu.split("\n");
+	for line in lines:
+		tmp = line.split("\t");
+		if len(tmp) >= 2:
+			converttable.append(tmp);
+			
+
+def kana2romaji(kana):
+	output = "";
+	for i in range(0, len(kana)/3):
+		char = kana[i*3:(i*3)+3];
+		if char == "ー" and i > 0:
+			output = output + output[len(output)-1];
+		for line in converttable:
+			if line[1] == char:
+				output = output + line[0];
+				break;
+	return output.replace("uu","ū").replace("oo","ō").replace("ou","ō");
+
+
+
 # Main
 def main():
+	reload(sys);
+	sys.setdefaultencoding('utf8');
+	get_converttable();
 	get_args();
+	for item in converttable:
+		print item[1] + " -> " + item[0];
 	while True:
 		mybot().start();
 		time.sleep(30);
 
-#main();
-
-
-
-
-def jisho(message):
-	conn = httplib.HTTPConnection("tangorin.com");
-	conn.request("GET", "/general/"+urllib.quote_plus(message));
-	result = re.findall('<div class="entry"><a class="btn btn-link entry-menu" onclick="entryMenu\(this,\{\n([\s\S]+)</div>', conn.getresponse().read())[0];
-	result = result.split("\">")[0].split("\n")[2:6];
-	for line in result:
-		line = line.split(":")[1];
-		print line;
-	kanji = re.findall("'(.*)'",result[0])[0];
-	kana = re.findall("'(.*)'",result[1])[0].split("・")[0];
-	trad = re.findall("'(.*)'",result[3])[0].replace("<ol>", "").replace("</ol>", "").replace("</li><li>", " - ").replace("<li>", "").replace("</li>", "");
-	output = "";
-	if kanji == "":
-		output = kana + " --> " + trad;
-	else:
-		output = kanji + "[" + kana + "] --> " + trad;
-
-	return output;
-
-print(jisho("senpai"));
-
-
-
-
+main();
