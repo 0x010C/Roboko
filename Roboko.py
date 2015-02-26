@@ -17,7 +17,7 @@ import unicodedata;
 import urllib;
 
 #Paramètres
-version = "1.18"
+version = "1.19"
 chan = "";
 pseudo = "";
 password = "";
@@ -156,7 +156,7 @@ class mybot(ircbot.SingleServerIRCBot):
 			return output.encode('utf-8');
 		else:
 			trad = kana2romaji(message);
-			if len(trad) > 0:
+			if trad == message:
 				return "Introuvable, tentative de transcription : " + trad;
 			else:
 				return "Introuvable";
