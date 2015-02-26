@@ -17,7 +17,7 @@ import unicodedata;
 import urllib;
 
 #Paramètres
-version = "1.16"
+version = "1.17"
 chan = "";
 pseudo = "";
 password = "";
@@ -245,6 +245,7 @@ def kana2romaji(kana):
 		kana = kana.replace(line[1], line[0]);
 	kana = re.sub("(.)ー", r"\1\1", kana);
 	kana = re.sub("っ(.)", r"\1\1", kana);
+	kana = re.sub("ッ(.)", r"\1\1", kana);
 	return kana.replace("ouu","ōu").replace("uu","ū").replace("oo","ō").replace("ou","ō");
 
 
