@@ -17,7 +17,7 @@ import unicodedata;
 import urllib;
 
 #Paramètres
-version = "1.17"
+version = "1.18"
 chan = "";
 pseudo = "";
 password = "";
@@ -93,6 +93,8 @@ class mybot(ircbot.SingleServerIRCBot):
 			self.send(canal, article_link(re.split("\[\[(.+)\]\]", message)[1].strip()));
 		if re.search("^!jisho .+", message):
 			self.send(canal, self.jisho(message[7:]));
+		if re.search("^!j .+", message):
+			self.send(canal, self.jisho(message[3:]));
 		
 
 	def checker(self):
