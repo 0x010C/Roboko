@@ -17,7 +17,7 @@ import unicodedata;
 import urllib;
 
 #Paramètres
-version = "1.19"
+version = "1.20"
 chan = "";
 pseudo = "";
 password = "";
@@ -89,8 +89,17 @@ class mybot(ircbot.SingleServerIRCBot):
 			self.send(author, " ");
 			self.send(author, "Roboko v"+version+", développé par 0x010C en python2.7 d'après les idées de Thibaut120094");
 		if re.search("\[\[.+\]\]", message):
-			print article_link(re.split("\[\[(.+)\]\]", message)[1].strip());
-			self.send(canal, article_link(re.split("\[\[(.+)\]\]", message)[1].strip()));
+			links = re.findall("\[\[([^\[\]]+)\]\]", message);
+			output = "";
+			for link in links:
+				if output == "":
+					newoutput = article_link(link.strip());
+				else:
+					newoutput = output + " - " + article_link(link.strip());
+				if len(newoutput) > 300:
+					break;
+				output = newoutput;
+			self.send(canal, output);
 		if re.search("^!jisho .+", message):
 			self.send(canal, self.jisho(message[7:]));
 		if re.search("^!j .+", message):
