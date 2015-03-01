@@ -143,7 +143,7 @@ class mybot(ircbot.SingleServerIRCBot):
 			if len(result) > 0:
 				if result[0][0] != '=':
 					result[0] = result[0].strip();
-					tmp = u"– Nouveau sujet sur le Manga Café par "+item.author+u" : https://fr.wikipedia.org/wiki/Discussion_Projet:Animation_et_bande_dessinée_asiatiques#"+urllib.quote_plus(result[0].replace(" ", "_"));
+					tmp = u"– Nouveau sujet sur le Manga café par "+item.author+u" : https://fr.wikipedia.org/wiki/Discussion_Projet:Animation_et_bande_dessinée_asiatiques#"+urllib.quote_plus(result[0].replace(" ", "_"));
 					print tmp.encode('utf-8');
 					self.act(chan, tmp.encode('utf-8'));
 					time.sleep(2);
