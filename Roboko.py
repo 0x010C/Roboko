@@ -17,7 +17,7 @@ import unicodedata;
 import urllib;
 
 #Paramètres
-version = "1.22"
+version = "1.23"
 chan = "";
 pseudo = "";
 password = "";
@@ -89,7 +89,7 @@ class mybot(ircbot.SingleServerIRCBot):
 			self.send(author, " ");
 			self.send(author, "Roboko v"+version+", développé par 0x010C en python2.7 d'après les idées de Thibaut120094");
 		if re.search("\[\[.+\]\]", message):
-			links = re.findall("\[\[([^\[\]]+)\]\]", message);
+			links = re.findall("\[\[([^\[\]\|]+)(?:\|[^\[\]]+)*\]\]", message);
 			output = "";
 			for link in links:
 				if output == "":
