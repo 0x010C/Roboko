@@ -22,7 +22,7 @@ chan = "";
 pseudo = "";
 password = "";
 server = "verne.freenode.net";
-port = 6667;
+port = 6697;
 converttable = [];
 
 wait = 300;
