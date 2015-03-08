@@ -17,7 +17,7 @@ import unicodedata;
 import urllib;
 
 #Paramètres
-version = "1.20"
+version = "1.22"
 chan = "";
 pseudo = "";
 password = "";
