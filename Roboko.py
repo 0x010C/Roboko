@@ -42,7 +42,7 @@ class mybot(ircbot.SingleServerIRCBot):
 		self.saveServ = serv;
 		if password != "":
 			self.send("nickserv", "identify " + password);
-			time.sleep(10);
+			time.sleep(8);
 		serv.join(chan);
 		self.checker();
 
@@ -96,7 +96,7 @@ class mybot(ircbot.SingleServerIRCBot):
 					newoutput = article_link(link.strip());
 				else:
 					newoutput = output + " - " + article_link(link.strip());
-				if len(newoutput) > 300:
+				if len(newoutput) > 340:
 					break;
 				output = newoutput;
 			self.send(canal, output);
@@ -120,8 +120,8 @@ class mybot(ircbot.SingleServerIRCBot):
 		entries = get_new_entries(cat_link, old_timestamp1);
 		for item in entries:
 			if re.search("\n<p><b>Nouvelle page</b></p>", item.summary):
-				tmp = u"– Nouvel article : [["+ item.title + u"]] – " + article_link(item.title.encode('utf-8'));
-				self.act(chan, tmp.encode('utf-8'));
+				tmp = u"\00313\002Nouvel article\002\003 : [[\00307"+ item.title + u"\003]] – \00310" + article_link(item.title.encode('utf-8')) + "\003";
+				self.send(chan, tmp.encode('utf-8'));
 				time.sleep(2);
 #			else:
 #				if isIp(item.author):
@@ -143,9 +143,9 @@ class mybot(ircbot.SingleServerIRCBot):
 			if len(result) > 0:
 				if result[0][0] != '=':
 					result[0] = result[0].strip();
-					tmp = u"– Nouveau sujet sur le Manga café par "+item.author+u" : https://fr.wikipedia.org/wiki/Discussion_Projet:Animation_et_bande_dessinée_asiatiques#"+urllib.quote_plus(result[0].replace(" ", "_"));
+					tmp = u"\00313\002Nouveau sujet sur le Manga café\002\003 par \00303"+item.author+u"\003 : \00310https://fr.wikipedia.org/wiki/Discussion_Projet:Animation_et_bande_dessinée_asiatiques#"+urllib.quote_plus(result[0].replace(" ", "_"))+u"\003";
 					print tmp.encode('utf-8');
-					self.act(chan, tmp.encode('utf-8'));
+					self.send(chan, tmp.encode('utf-8'));
 					time.sleep(2);
 		old_timestamp2 = timestamp2;
 
@@ -161,14 +161,14 @@ class mybot(ircbot.SingleServerIRCBot):
 			kana = re.findall("'(.*)'",result[1])[0].split("・")[0];
 			trad = re.findall("'(.*)'",result[3])[0].replace("<ol>", "").replace("</ol>", "").replace("</li><li>", " - ").replace("<li>", "").replace("</li>", "");
 
-			output = kanji + "[" + kana + ", " + kana2romaji(kana) + "] --> " + trad;
+			output = "\00313" + kanji + "\003[\00305" + kana + "\003, \00307" + kana2romaji(kana) + "\003] --> \003" + trad + "\003";
 			return output.encode('utf-8');
 		else:
 			trad = kana2romaji(message);
 			if trad == message:
-				return "Introuvable, tentative de transcription : " + trad;
+				return "\00304Introuvable, tentative de transcription\003 : " + trad;
 			else:
-				return "Introuvable";
+				return "\00304Introuvable\003";
 
 
 
