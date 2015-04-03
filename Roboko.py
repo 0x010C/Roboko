@@ -17,7 +17,7 @@ import unicodedata;
 import urllib;
 
 #Paramètres
-version = "1.24"
+version = "1.25"
 chan = "";
 pseudo = "";
 password = "";
@@ -67,6 +67,12 @@ class mybot(ircbot.SingleServerIRCBot):
 		except:
 			print u"except";
 
+	def send_notice(self, to, message):
+		try:
+			self.saveServ.notice(to, message);
+		except:
+			print u"except";
+
 	def act(self, to, message):
 		try:
 			self.saveServ.action(to, message);
@@ -104,6 +110,11 @@ class mybot(ircbot.SingleServerIRCBot):
 			self.send(canal, self.jisho(message[7:]));
 		if re.search("^!j .+", message):
 			self.send(canal, self.jisho(message[3:]));
+		if (re.search(u"^!exit", message) or re.search(u"^!stop", message)) and self.channels[chan].is_oper(author):
+			self.send(chan, u"\002\00304STOPPED\003\002")
+			sys.exit()
+		elif (re.search(u"^!exit", message) or re.search(u"^!stop", message)) and not self.channels[chan].is_oper(author):
+			self.send_notice(author, u"Vous n'avez pas les droits nécessaires pour me stopper. En cas de dysfonctionnement, vous pouvez contacter Thibaut120094 ou kiwi_0x010C")
 		
 
 	def checker(self):
