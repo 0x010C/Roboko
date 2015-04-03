@@ -175,7 +175,7 @@ class mybot(ircbot.SingleServerIRCBot):
 			return output.encode('utf-8');
 		else:
 			trad = kana2romaji(message);
-			if trad == message:
+			if trad != message:
 				return "\00304Introuvable, tentative de transcription\003 : " + trad;
 			else:
 				return "\00304Introuvable\003";
