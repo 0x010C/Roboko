@@ -17,7 +17,7 @@ import unicodedata;
 import urllib;
 
 #Paramètres
-version = "1.23"
+version = "1.24"
 chan = "";
 pseudo = "";
 password = "";
@@ -159,8 +159,7 @@ class mybot(ircbot.SingleServerIRCBot):
 				line = line.split(":")[1];
 			kanji = re.findall("'(.*)'",result[0])[0];
 			kana = re.findall("'(.*)'",result[1])[0].split("・")[0];
-			trad = re.findall("'(.*)'",result[3])[0].replace("<ol>", "").replace("</ol>", "").replace("</li><li>", " - ").replace("<li>", "").replace("</li>", "");
-
+			trad = re.findall("'(.*)'",result[3])[0].replace("<ol>", "").replace("</ol>", "").replace("</li><li>", " - ").replace("<li>", "").replace("</li>", "").replace("\\", "");
 			output = "\00313" + kanji + "\003[\00305" + kana + "\003, \00307" + kana2romaji(kana) + "\003] --> \003" + trad + "\003";
 			return output.encode('utf-8');
 		else:
