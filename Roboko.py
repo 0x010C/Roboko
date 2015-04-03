@@ -17,7 +17,7 @@ import unicodedata;
 import urllib;
 
 #Paramètres
-version = "1.25"
+version = "1.27"
 chan = "";
 pseudo = "";
 password = "";
@@ -202,7 +202,7 @@ def get_new_entries(link, old_timestamp):
 
 # Divers
 def article_link(link):
-	return "https://fr.wikipedia.org/wiki/" + urllib.quote_plus(link.replace(" ", "_"));
+	return "https://fr.wikipedia.org/wiki/" + urllib.quote_plus(link.replace(" ", "_")).replace(".$", "%2E");
 
 def isIp(name):
 	if re.search("^[0-9]{1,3}.[0-9]{1,3}.[0-9]{1,3}.[0-9]{1,3}$", name):
