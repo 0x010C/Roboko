@@ -7,6 +7,7 @@
 import httplib;
 import time;
 import calendar;
+import datetime;
 import os;
 import sys;
 from feedparser import parse;
@@ -17,13 +18,14 @@ import unicodedata;
 import urllib;
 
 #Paramètres
-version = "1.28"
+version = "1.29"
 chan = "";
 pseudo = "";
 password = "";
 server = "verne.freenode.net";
 port = 6697;
 converttable = [];
+logfile = None;
 
 wait = 300;
 cat = "https://fr.wikipedia.org/w/api.php?hidebots=1&days=7&limit=50&target=Catégorie:Portail:Animation+et+bande+dessinée+asiatiques/Articles+liés&hidewikidata=1&action=feedrecentchanges&feedformat=atom";
@@ -44,6 +46,7 @@ class mybot(ircbot.SingleServerIRCBot):
 		if password != "":
 			self.send("nickserv", "identify " + password);
 			time.sleep(8);
+		self.openlog();
 		serv.join(chan);
 		self.checker();
 
@@ -54,17 +57,41 @@ class mybot(ircbot.SingleServerIRCBot):
 		author = irclib.nm_to_n(ev.source());
 		canal = ev.target();
 		message = ev.arguments()[0];
+		if canal == chan:
+			self.log("<"+author+"> "+message);
 		self.command(author, canal, message);
 
 	def on_action(self, serv, ev):
 		author = irclib.nm_to_n(ev.source());
 		canal = ev.target();
 		message = ev.arguments()[0];
+		if canal == chan:
+			self.log("<"+author+"> "+author+" "+message);
 		self.command(author, canal, message);
+
+	def on_nick(self, serv, ev):
+		self.log("<*> "+irclib.nm_to_n(ev.source())+u" s'appelle à présent "+ev.target());
+
+	def on_join(self, serv, ev):
+		self.log("<*> "+irclib.nm_to_n(ev.source())+u" a rejoint le canal");
+
+	def on_part(self, serv, ev):
+		self.log("<*> "+irclib.nm_to_n(ev.source())+u" a quité le canal ("+ev.arguments()[0]+u")");
+
+	def on_quit(self, serv, ev):
+		self.log("<*> "+irclib.nm_to_n(ev.source())+u" a quité le serveur ("+ev.arguments()[0]+u")");
+
+	def on_kick(self, serv, ev):
+		self.log("<*> "+irclib.nm_to_n(ev.source())+u" a expulsé "+ev.arguments()[0]+u" ("+ev.arguments()[1]+u")");
+
+	def on_mode(self, serv, ev):
+		self.log("<*> "+irclib.nm_to_n(ev.source())+u" a modifié des modes : "+" ".join(ev.arguments()));
 
 	def send(self, to, message):
 		try:
 			self.saveServ.privmsg(to, message);
+			if to == chan:
+				self.log("<Roboko> "+message);
 		except:
 			print u"except";
 
@@ -77,6 +104,8 @@ class mybot(ircbot.SingleServerIRCBot):
 	def act(self, to, message):
 		try:
 			self.saveServ.action(to, message);
+			if to == chan:
+				self.log("<Roboko> "+message);
 		except:
 			print u"except";
 
@@ -115,8 +144,18 @@ class mybot(ircbot.SingleServerIRCBot):
 			self.send(chan, u"\002\00304STOPPED\003\002")
 			sys.exit()
 		elif (re.search(u"^!exit", message) or re.search(u"^!stop", message)) and not self.channels[chan].is_oper(author):
-			self.send_notice(author, u"Vous n'avez pas les droits nécessaires pour me stopper. En cas de dysfonctionnement, vous pouvez contacter Thibaut120094 ou kiwi_0x010C")
-		
+			self.send_notice(author, u"Vous n'avez pas les droits nécessaires pour me stopper. En cas de dysfonctionnement, vous pouvez contacter Thibaut120094 ou kiwi_0x010C.")
+	
+	def log(self, message):
+		logfile.write(time.strftime('%H:%M:%S',time.localtime())+" "+message.encode("utf-8")+"\n");
+	
+	def openlog(self):
+		global logfile;
+		if logfile != None:
+			logfile.close();
+		logfile = open("log/"+time.strftime('%Y-%m-%d',time.localtime())+".log", "a");
+		t=datetime.date.today() + datetime.timedelta(1);
+		self.saveServ.execute_at(calendar.timegm(t.timetuple()), self.openlog);
 
 	def checker(self):
 		print "### Checker";
@@ -323,4 +362,3 @@ def main():
 		time.sleep(30);
 
 main();
-print timestampisation2("Fri, 03 Apr 2015 08:20:20 -0400");
