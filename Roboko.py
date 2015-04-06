@@ -110,7 +110,6 @@ class mybot(ircbot.SingleServerIRCBot):
 			print u"except";
 
 	def command(self, author, canal, message):
-		print author + " --> " + message;
 		if re.search("^!help", message):
 			self.send(author, "Roboko, bot irc pour le chan du Projet:Animation et bande dessinée asiatiques sur la Wikipédia francophone (##abda)");
 			time.sleep(1);
@@ -147,7 +146,10 @@ class mybot(ircbot.SingleServerIRCBot):
 			self.send_notice(author, u"Vous n'avez pas les droits nécessaires pour me stopper. En cas de dysfonctionnement, vous pouvez contacter Thibaut120094 ou kiwi_0x010C.")
 	
 	def log(self, message):
-		logfile.write(time.strftime('%H:%M:%S',time.localtime())+" "+message.encode("utf-8")+"\n");
+		try:
+			logfile.write(time.strftime('%H:%M:%S',time.localtime())+" "+message.encode("utf-8")+"\n");
+		except:
+			print "Coudn't log a message";
 	
 	def openlog(self):
 		global logfile;
