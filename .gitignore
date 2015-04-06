@@ -1,4 +1,4 @@
 Roboko.conf
 nohup.out
 irclib.pyc
-ircbot.pyc
+ircbot.pyc*.log
