@@ -46,7 +46,6 @@ class mybot(ircbot.SingleServerIRCBot):
 		if password != "":
 			self.send("nickserv", "identify " + password);
 			time.sleep(8);
-		self.openlog();
 		serv.join(chan);
 		self.checker();
 
@@ -147,17 +146,11 @@ class mybot(ircbot.SingleServerIRCBot):
 	
 	def log(self, message):
 		try:
+			logfile = open("log/"+time.strftime('%Y-%m-%d',time.localtime())+".log", "a");
 			logfile.write(time.strftime('%H:%M:%S',time.localtime())+" "+message.encode("utf-8")+"\n");
+			logfile.close();
 		except:
 			print "Coudn't log a message";
-	
-	def openlog(self):
-		global logfile;
-		if logfile != None:
-			logfile.close();
-		logfile = open("log/"+time.strftime('%Y-%m-%d',time.localtime())+".log", "a");
-		t=datetime.date.today() + datetime.timedelta(1);
-		self.saveServ.execute_at(calendar.timegm(t.timetuple()), self.openlog);
 
 	def checker(self):
 		print "### Checker";
