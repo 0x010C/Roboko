@@ -156,7 +156,7 @@ class mybot(ircbot.SingleServerIRCBot):
 		print "### Checker";
 		self.check_new_article(cat);
 		self.check_new_section(page);
-		self.check_new_news();
+		#self.check_new_news(); #Affichage des news désactivé
 		self.saveServ.execute_delayed(wait, self.checker);
 
 
