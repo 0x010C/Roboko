@@ -240,7 +240,7 @@ class mybot(ircbot.SingleServerIRCBot):
 						type1 = r1.findall(revs[0]["*"])[0].replace("\n", "").strip().lower();
 						type2 = r1.findall(revs[1]["*"])[0].replace("\n", "").strip().lower();
 						if type1 != type2:
-							tmp = item.author+u" a modifié le type de [["+item.title+u"]], de \""+type1+u"\" à \""+type2+u"\" — https://fr.wikipedia.org/wiki/Special:Diff/"+re.sub(".*diff=([0-9]+).*", r"\1", entries[0].id);
+							tmp = item.author+u" a modifié le type de [["+item.title+u"]], de \""+type2+u"\" à \""+type1+u"\" — https://fr.wikipedia.org/wiki/Special:Diff/"+re.sub(".*diff=([0-9]+).*", r"\1", entries[0].id);
 							self.send(chan, tmp.encode('utf-8'));
 					except:
 						print "";
@@ -249,7 +249,7 @@ class mybot(ircbot.SingleServerIRCBot):
 						type1 = r2.findall(revs[0]["*"])[0].replace("\n", "").strip().lower();
 						type2 = r2.findall(revs[1]["*"])[0].replace("\n", "").strip().lower();
 						if type1 != type2:
-							tmp = item.author+u" a modifié le type de [["+item.title+u"]], de \""+type1+u"\" à \""+type2+u"\" — https://fr.wikipedia.org/wiki/Special:Diff/"+re.sub(".*diff=([0-9]+).*", r"\1", entries[0].id);
+							tmp = item.author+u" a modifié le type de [["+item.title+u"]], de \""+type2+u"\" à \""+type1+u"\" — https://fr.wikipedia.org/wiki/Special:Diff/"+re.sub(".*diff=([0-9]+).*", r"\1", entries[0].id);
 							self.send(chan, tmp.encode('utf-8'));
 					except:
 						print "";
