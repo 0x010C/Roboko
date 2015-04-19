@@ -16,9 +16,10 @@ import ircbot;
 import re;
 import unicodedata;
 import urllib;
+import json;
 
 #Paramètres
-version = "1.29"
+version = "1.31"
 chan = "";
 pseudo = "";
 password = "";
@@ -34,6 +35,10 @@ page = "https://fr.wikipedia.org/w/index.php?title=Discussion_Projet:Animation_e
 old_timestamp1 = calendar.timegm(time.gmtime());
 old_timestamp2 = calendar.timegm(time.gmtime());
 old_timestamp3 = calendar.timegm(time.gmtime());
+old_timestamp4 = calendar.timegm(time.gmtime());
+
+r1 = re.compile(ur"\{\{Infobox Animation et bande dessinée asiatiques/Entête(?:[^\}\{]|\{\{(?:[^\}\{]|\{\{(?:[^\}\{]|\{\{[^\}]*\}\})*\}\})*\}\})*type *=([^\}\|]*)");
+r2 = re.compile(ur"\{\{Infobox Animation et bande dessinée asiatiques/Livre(?:[^\}\{]|\{\{(?:[^\}\{]|\{\{(?:[^\}\{]|\{\{[^\}]*\}\})*\}\})*\}\})*public_cible *=([^\}\|]*)");
 
 
 # Boucle principale + Gestion de la lecture et de l'écriture IRC
@@ -154,17 +159,18 @@ class mybot(ircbot.SingleServerIRCBot):
 
 	def checker(self):
 		print "### Checker";
-		self.check_new_article(cat);
+		self.check_new_article();
 		self.check_new_section(page);
+		self.check_type_change();
 		#self.check_new_news(); #Affichage des news désactivé
 		self.saveServ.execute_delayed(wait, self.checker);
 
 
 	# Les checkers
-	def check_new_article(self, cat_link):
-		global old_timestamp1;
+	def check_new_article(self):
+		global old_timestamp1, cat;
 		timestamp1 = calendar.timegm(time.gmtime());
-		entries = get_new_entries_atom(cat_link, old_timestamp1);
+		entries = get_new_entries_atom(cat, old_timestamp1);
 		for item in entries:
 			if re.search("\n<p><b>Nouvelle page</b></p>", item.summary):
 				tmp = u"\00313\002Nouvel article\002\003 : [[\00307"+ item.title + u"\003]] – \00310" + article_link(item.title.encode('utf-8')) + "\003";
@@ -211,6 +217,45 @@ class mybot(ircbot.SingleServerIRCBot):
 			self.send(chan, tmp.encode('utf-8'));
 
 		old_timestamp3 = timestamp3;
+	
+	def check_type_change(self):
+		global old_timestamp4, r1, r2;
+		timestamp4 = calendar.timegm(time.gmtime());
+		entries = get_new_entries_atom(cat, old_timestamp4);
+		conn = httplib.HTTPSConnection("fr.wikipedia.org");
+		for item in entries:
+			conn.request("GET", u"/w/api.php?format=json&action=query&list=users&usprop=groups&ususers="+item.author.replace(" ", "_"));
+			autopatrolled = False;
+			try:
+				if "autopatrolled" in json.loads(conn.getresponse().read())["query"]["users"][0]["groups"]:
+					autopatrolled = True;
+			except:
+				print "";
+			if not autopatrolled:
+				try:
+					conn.request("GET", u"/w/api.php?action=query&prop=revisions&rvprop=content&rvlimit=2&continue&format=json&titles="+item.title.replace(" ", "_"));
+					revs = json.loads(conn.getresponse().read())["query"]["pages"].itervalues().next()["revisions"]
+
+					try:
+						type1 = r1.findall(revs[0]["*"])[0].replace("\n", "").strip().lower();
+						type2 = r1.findall(revs[1]["*"])[0].replace("\n", "").strip().lower();
+						if type1 != type2:
+							tmp = item.author+u" a modifié le type de [["+item.title+u"]], de \""+type1+u"\" à \""+type2+u"\" — https://fr.wikipedia.org/wiki/Special:Diff/"+re.sub(".*diff=([0-9]+).*", r"\1", entries[0].id);
+							self.send(chan, tmp.encode('utf-8'));
+					except:
+						print "";
+
+					try:
+						type1 = r2.findall(revs[0]["*"])[0].replace("\n", "").strip().lower();
+						type2 = r2.findall(revs[1]["*"])[0].replace("\n", "").strip().lower();
+						if type1 != type2:
+							tmp = item.author+u" a modifié le type de [["+item.title+u"]], de \""+type1+u"\" à \""+type2+u"\" — https://fr.wikipedia.org/wiki/Special:Diff/"+re.sub(".*diff=([0-9]+).*", r"\1", entries[0].id);
+							self.send(chan, tmp.encode('utf-8'));
+					except:
+						print "";
+				except:
+					print "";
+		old_timestamp4 = timestamp4;
 
 	def jisho(self, message):
 		conn = httplib.HTTPConnection("tangorin.com");
@@ -355,5 +400,6 @@ def main():
 	while True:
 		mybot().start();
 		time.sleep(30);
+
 
 main();
