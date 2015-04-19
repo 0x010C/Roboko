@@ -50,7 +50,7 @@ class mybot(ircbot.SingleServerIRCBot):
 		self.saveServ = serv;
 		if password != "":
 			self.send("nickserv", "identify " + password);
-			time.sleep(8);
+			time.sleep(10);
 		serv.join(chan);
 		self.checker();
 
