@@ -81,15 +81,15 @@ class mybot(ircbot.SingleServerIRCBot):
 
 	def on_part(self, serv, ev):
 		if len(ev.arguments()) > 0:
-			self.log("<*> "+irclib.nm_to_n(ev.source())+u" a quité le canal ("+ev.arguments()[0]+u")");
+			self.log("<*> "+irclib.nm_to_n(ev.source())+u" a quitté le canal ("+ev.arguments()[0]+u")");
 		else:
-			self.log("<*> "+irclib.nm_to_n(ev.source())+u" a quité le canal");
+			self.log("<*> "+irclib.nm_to_n(ev.source())+u" a quitté le canal");
 
 	def on_quit(self, serv, ev):
 		if len(ev.arguments()) > 0:
-			self.log("<*> "+irclib.nm_to_n(ev.source())+u" a quité le serveur ("+ev.arguments()[0]+u")");
+			self.log("<*> "+irclib.nm_to_n(ev.source())+u" a quitté le serveur ("+ev.arguments()[0]+u")");
 		else:
-			self.log("<*> "+irclib.nm_to_n(ev.source())+u" a quité le serveur");
+			self.log("<*> "+irclib.nm_to_n(ev.source())+u" a quitté le serveur");
 
 	def on_kick(self, serv, ev):
 		self.log("<*> "+irclib.nm_to_n(ev.source())+u" a expulsé "+ev.arguments()[0]+u" ("+ev.arguments()[1]+u")");
