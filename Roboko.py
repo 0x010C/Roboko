@@ -19,7 +19,7 @@ import urllib;
 import json;
 
 #Paramètres
-version = "1.31"
+version = "1.32"
 chan = "";
 pseudo = "";
 password = "";
@@ -150,7 +150,7 @@ class mybot(ircbot.SingleServerIRCBot):
 		if re.search("^!j .+", message):
 			self.send(canal, self.jisho(message[3:]));
 		if (re.search(u"^!exit", message) or re.search(u"^!stop", message)) and self.channels[chan].is_oper(author):
-			self.send(chan, u"\002\00304Stopped\003\002")
+			self.send(chan, u"\002\00304oyasumi\003\002")
 			sys.exit()
 		elif (re.search(u"^!exit", message) or re.search(u"^!stop", message)) and not self.channels[chan].is_oper(author):
 			self.send_notice(author, u"Vous n'avez pas les droits nécessaires pour me stopper. En cas de dysfonctionnement, vous pouvez contacter Thibaut120094 ou kiwi_0x010C.")
