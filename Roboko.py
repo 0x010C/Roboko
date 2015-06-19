@@ -19,7 +19,7 @@ import urllib;
 import json;
 
 #Paramètres
-version = "1.32"
+version = "1.33"
 chan = "";
 pseudo = "";
 password = "";
@@ -161,7 +161,7 @@ class mybot(ircbot.SingleServerIRCBot):
 			logfile.write(time.strftime('%H:%M:%S',time.localtime())+" "+message.encode("utf-8")+"\n");
 			logfile.close();
 		except:
-			print "Coudn't log a message";
+			print "Couldn't log a message";
 
 	def checker(self):
 		print "### Checker";
