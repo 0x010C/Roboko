@@ -18,17 +18,22 @@ import unicodedata;
 import urllib;
 import json;
 
+# Roboko
+import Roboko_args as rbk_args;
+import Roboko_jisho as rbk_jisho;
+
 #Paramètres
-version = "1.34"
+version = "1.36";
+
 chan = "";
 pseudo = "";
 password = "";
-server = "verne.freenode.net";
-port = 6697;
-converttable = [];
+server = "";
+port = 0;
+wait = 0;
+
 logfile = None;
 
-wait = 300;
 cat = "https://fr.wikipedia.org/w/api.php?hidebots=1&days=7&limit=50&target=Catégorie:Portail:Animation+et+bande+dessinée+asiatiques/Articles+liés&hidewikidata=1&action=feedrecentchanges&feedformat=atom";
 page = "https://fr.wikipedia.org/w/index.php?title=Discussion_Projet:Animation_et_bande_dessin%C3%A9e_asiatiques&feed=atom&action=history";
 
@@ -146,9 +151,9 @@ class mybot(ircbot.SingleServerIRCBot):
 				output = newoutput;
 			self.send(canal, output);
 		if re.search("^!jisho .+", message):
-			self.send(canal, self.jisho(message[7:]));
+			self.send(canal, rbk_jisho.translate(message[7:]));
 		if re.search("^!j .+", message):
-			self.send(canal, self.jisho(message[3:]));
+			self.send(canal, rbk_jisho.translate(message[3:]));
 		if (re.search(u"^!exit", message) or re.search(u"^!stop", message)) and self.channels[chan].is_oper(author):
 			self.send(chan, u"\002\00304oyasumi~\003\002")
 			sys.exit()
@@ -161,7 +166,7 @@ class mybot(ircbot.SingleServerIRCBot):
 			logfile.write(time.strftime('%H:%M:%S',time.localtime())+" "+message.encode("utf-8")+"\n");
 			logfile.close();
 		except:
-			print "Couldn't log a message";
+			print "Coudn't log a message";
 
 	def checker(self):
 		print "### Checker";
@@ -264,26 +269,6 @@ class mybot(ircbot.SingleServerIRCBot):
 					print "";
 		old_timestamp4 = timestamp4;
 
-	def jisho(self, message):
-		conn = httplib.HTTPConnection("tangorin.com");
-		conn.request("GET", "/general/"+urllib.quote_plus(message));
-		result = re.findall('<div class="entry"><a class="btn btn-link entry-menu" onclick="entryMenu\(this,\{\n([\s\S]+)</div>', conn.getresponse().read());
-		if len(result) > 0:
-			result = result[0].split("\">")[0].split("\n")[2:6];
-			for line in result:
-				line = line.split(":")[1];
-			kanji = re.findall("'(.*)'",result[0])[0];
-			kana = re.findall("'(.*)'",result[1])[0].split("・")[0];
-			trad = re.findall("'(.*)'",result[3])[0].replace("<ol>", "").replace("</ol>", "").replace("</li><li>", " - ").replace("<li>", "").replace("</li>", "").replace("\\", "");
-			output = "\00313" + kanji + "\003[\00305" + kana + "\003, \00307" + kana2romaji(kana) + "\003] --> \003" + trad + "\003";
-			return output.encode('utf-8');
-		else:
-			trad = kana2romaji(message);
-			if trad != message:
-				return "\00304Introuvable, tentative de transcription\003 : " + trad;
-			else:
-				return "\00304Introuvable\003";
-
 
 
 def T(title, message):
@@ -348,71 +333,20 @@ def isIp(name):
 		else:
 			return False;
 
-# Args
-def parse_config_file():
-	global chan;
-	global pseudo;
-	global password;
-	if(os.path.isfile("Roboko.conf") == False):
-		return;
-	fichier = open("Roboko.conf", "r");
-	contenu = fichier.read();
-	fichier.close();
-	for line in contenu.split("\n"):
-		if re.search("^[Cc]han:", line):
-			chan = line[5:];
-		if re.search("^[Pp]seudo:", line):
-			pseudo = line[7:];
-		if re.search("^[Pp]assword:", line):
-			password = line[9:];
 
-def get_args():
-	global chan;
-	global pseudo;
-	global password;
-	parse_config_file();
-	if chan == "":
-		print "Chan";
-		print "> ",;chan = sys.stdin.readline().split("\n")[0];
-	if pseudo == "":
-		print "Pseudo";
-		print "> ",;pseudo = sys.stdin.readline().split("\n")[0];
-	if password == "":
-		print "Password";
-		print "> ",;password = sys.stdin.readline().split("\n")[0];
-
-
-
-def get_converttable():
-	if os.path.isfile("kana.list") == False:
-		print "kana.list introuvable !";
-		sys.exit();
-	fichier = open("kana.list", "r");
-	contenu = fichier.read();
-	lines = contenu.split("\n");
-	for line in lines:
-		tmp = line.split("\t");
-		if len(tmp) >= 2:
-			converttable.append(tmp);
 			
 
-def kana2romaji(kana):
-	for line in converttable:
-		kana = kana.replace(line[1], line[0]);
-	kana = re.sub("(.)ー", r"\1\1", kana);
-	kana = re.sub("っ(.)", r"\1\1", kana);
-	kana = re.sub("ッ(.)", r"\1\1", kana);
-	return kana.replace("ouu","ōu").replace("uu","ū").replace("oo","ō").replace("ou","ō");
+
 
 
 # Main
 def main():
+	global chan, pseudo, password, server, port, wait;
 	reload(sys);
 	sys.setdefaultencoding('utf8');
-	get_converttable();
-	get_args();
-	for item in converttable:
-		print item[1] + " -> " + item[0];
+	rbk_jisho.get_converttable();
+	(chan,pseudo,password,server,port,wait) = rbk_args.get_args();
+
 	while True:
 		mybot().start();
 		time.sleep(30);
