@@ -241,6 +241,7 @@ class mybot(ircbot.SingleServerIRCBot):
 				try:
 					conn.request("GET", u"/w/api.php?action=query&prop=revisions&rvprop=content&rvlimit=2&continue&format=json&titles="+item.title.replace(" ", "_"));
 					revs = json.loads(conn.getresponse().read())["query"]["pages"].itervalues().next()["revisions"]
+					T("Check type change", revs);
 
 					try:
 						type1 = r1.findall(revs[0]["*"])[0].replace("\n", "").strip().lower();
@@ -262,6 +263,15 @@ class mybot(ircbot.SingleServerIRCBot):
 				except:
 					print "";
 		old_timestamp4 = timestamp4;
+
+def T(title, message):
+	try:
+		logfile = open("trace/"+time.strftime('%Y-%m-%d',time.localtime())+".log", "a");
+		logfile.write(time.strftime('%H:%M:%S',time.localtime())+" "+title.encode("utf-8")+"\n=============================================================\n"+message.encode("utf-8")+"\n\n\n\n");
+		logfile.close();
+	except:
+		print "Coudn't trace";
+
 
 	def jisho(self, message):
 		conn = httplib.HTTPConnection("tangorin.com");
