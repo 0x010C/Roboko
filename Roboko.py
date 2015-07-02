@@ -4,23 +4,15 @@
 #Date: 19 february 2015
 #License: GNU GPL v3
 
-import httplib;
-import time;
-import calendar;
-import datetime;
-import os;
 import sys;
-from feedparser import parse;
-import irclib;
-import ircbot;
-import re;
-import unicodedata;
+import time;
 import urllib;
 import json;
 
 # Roboko
 import Roboko_args as rbk_args;
 import Roboko_jisho as rbk_jisho;
+import Roboko_irc as rbk_irc;
 
 #Paramètres
 version = "1.36";
@@ -32,307 +24,6 @@ server = "";
 port = 0;
 wait = 0;
 
-logfile = None;
-
-cat = "https://fr.wikipedia.org/w/api.php?hidebots=1&days=7&limit=50&target=Catégorie:Portail:Animation+et+bande+dessinée+asiatiques/Articles+liés&hidewikidata=1&action=feedrecentchanges&feedformat=atom";
-page = "https://fr.wikipedia.org/w/index.php?title=Discussion_Projet:Animation_et_bande_dessin%C3%A9e_asiatiques&feed=atom&action=history";
-
-old_timestamp1 = calendar.timegm(time.gmtime());
-old_timestamp2 = calendar.timegm(time.gmtime());
-old_timestamp3 = calendar.timegm(time.gmtime());
-old_timestamp4 = calendar.timegm(time.gmtime());
-
-r1 = re.compile(ur"\{\{Infobox Animation et bande dessinée asiatiques/Entête(?:[^\}\{]|\{\{(?:[^\}\{]|\{\{(?:[^\}\{]|\{\{[^\}]*\}\})*\}\})*\}\})*type *=([^\}\|]*)");
-r2 = re.compile(ur"\{\{Infobox Animation et bande dessinée asiatiques/Livre(?:[^\}\{]|\{\{(?:[^\}\{]|\{\{(?:[^\}\{]|\{\{[^\}]*\}\})*\}\})*\}\})*public_cible *=([^\}\|]*)");
-
-
-# Boucle principale + Gestion de la lecture et de l'écriture IRC
-class mybot(ircbot.SingleServerIRCBot):
-	def __init__(self):
-		ircbot.SingleServerIRCBot.__init__(self, [(server, port)],pseudo, "Roboko v"+version);
-
-	def on_welcome(self, serv, ev):
-		self.saveServ = serv;
-		if password != "":
-			self.send("nickserv", "identify " + password);
-			time.sleep(10);
-		serv.join(chan);
-		self.checker();
-
-	def on_privnotice(self, serv, ev):
-		print "#" + irclib.nm_to_n(ev.source()) + "# --> " + ev.arguments()[0];
-
-	def on_pubmsg(self, serv, ev):
-		author = irclib.nm_to_n(ev.source());
-		canal = ev.target();
-		message = ev.arguments()[0];
-		if canal == chan:
-			self.log("<"+author+"> "+message);
-		self.command(author, canal, message);
-
-	def on_action(self, serv, ev):
-		author = irclib.nm_to_n(ev.source());
-		canal = ev.target();
-		message = ev.arguments()[0];
-		if canal == chan:
-			self.log("<"+author+"> "+author+" "+message);
-		self.command(author, canal, message);
-
-	def on_nick(self, serv, ev):
-		self.log("<*> "+irclib.nm_to_n(ev.source())+u" s'appelle à présent "+ev.target());
-
-	def on_join(self, serv, ev):
-		self.log("<*> "+irclib.nm_to_n(ev.source())+u" a rejoint le canal");
-
-	def on_part(self, serv, ev):
-		if len(ev.arguments()) > 0:
-			self.log("<*> "+irclib.nm_to_n(ev.source())+u" a quitté le canal ("+ev.arguments()[0]+u")");
-		else:
-			self.log("<*> "+irclib.nm_to_n(ev.source())+u" a quitté le canal");
-
-	def on_quit(self, serv, ev):
-		if len(ev.arguments()) > 0:
-			self.log("<*> "+irclib.nm_to_n(ev.source())+u" a quitté le serveur ("+ev.arguments()[0]+u")");
-		else:
-			self.log("<*> "+irclib.nm_to_n(ev.source())+u" a quitté le serveur");
-
-	def on_kick(self, serv, ev):
-		self.log("<*> "+irclib.nm_to_n(ev.source())+u" a expulsé "+ev.arguments()[0]+u" ("+ev.arguments()[1]+u")");
-
-	def on_mode(self, serv, ev):
-		self.log("<*> "+irclib.nm_to_n(ev.source())+u" a modifié des modes : "+" ".join(ev.arguments()));
-
-	def send(self, to, message):
-		try:
-			self.saveServ.privmsg(to, message);
-			if to == chan:
-				self.log("<Roboko> "+message);
-		except:
-			print u"except";
-
-	def send_notice(self, to, message):
-		try:
-			self.saveServ.notice(to, message);
-		except:
-			print u"except";
-
-	def act(self, to, message):
-		try:
-			self.saveServ.action(to, message);
-			if to == chan:
-				self.log("<Roboko> "+message);
-		except:
-			print u"except";
-
-	def command(self, author, canal, message):
-		if re.search("^!help", message):
-			self.send(author, "Roboko, bot irc pour le chan du Projet:Animation et bande dessinée asiatiques sur la Wikipédia francophone (##abda)");
-			time.sleep(1);
-			self.send(author, " ");
-			self.send(author, "Commandes disponibles :");
-			self.send(author, "!help : affiche ce message d'aide");
-			self.send(author, "!jisho : tranduit et transcrit un mot japonais");
-			self.send(author, "[[lien interne WP]] : traduit un lien interne en url");
-			self.send(author, "Annonce les nouveaux articles du Portail:ABDA");
-			self.send(author, "Annonce les nouveaux sujets sur le Manga café");
-			time.sleep(1);
-			self.send(author, " ");
-			self.send(author, "Roboko v"+version+", développé par 0x010C en python2.7 d'après les idées de Thibaut120094");
-		if re.search("\[\[.+\]\]", message):
-			links = re.findall("\[\[([^\[\]\|]+)(?:\|[^\[\]]+)*\]\]", message);
-			output = "";
-			for link in links:
-				if output == "":
-					newoutput = article_link(link.strip());
-				else:
-					newoutput = output + " - " + article_link(link.strip());
-				if len(newoutput) > 340:
-					break;
-				output = newoutput;
-			self.send(canal, output);
-		if re.search("^!jisho .+", message):
-			self.send(canal, rbk_jisho.translate(message[7:]));
-		if re.search("^!j .+", message):
-			self.send(canal, rbk_jisho.translate(message[3:]));
-		if (re.search(u"^!exit", message) or re.search(u"^!stop", message)) and self.channels[chan].is_oper(author):
-			self.send(chan, u"\002\00304oyasumi~\003\002")
-			sys.exit()
-		elif (re.search(u"^!exit", message) or re.search(u"^!stop", message)) and not self.channels[chan].is_oper(author):
-			self.send_notice(author, u"Vous n'avez pas les droits nécessaires pour me stopper. En cas de dysfonctionnement, vous pouvez contacter Thibaut120094 ou kiwi_0x010C.")
-	
-	def log(self, message):
-		try:
-			logfile = open("log/"+time.strftime('%Y-%m-%d',time.localtime())+".log", "a");
-			logfile.write(time.strftime('%H:%M:%S',time.localtime())+" "+message.encode("utf-8")+"\n");
-			logfile.close();
-		except:
-			print "Coudn't log a message";
-
-	def checker(self):
-		print "### Checker";
-		self.check_new_article();
-		self.check_new_section(page);
-		self.check_type_change();
-		#self.check_new_news(); #Affichage des news désactivé
-		self.saveServ.execute_delayed(wait, self.checker);
-
-
-	# Les checkers
-	def check_new_article(self):
-		global old_timestamp1, cat;
-		timestamp1 = calendar.timegm(time.gmtime());
-		entries = get_new_entries_atom(cat, old_timestamp1);
-		for item in entries:
-			if re.search("\n<p><b>Nouvelle page</b></p>", item.summary):
-				tmp = u"\00313\002Nouvel article\002\003 : [[\00307"+ item.title + u"\003]] – \00310" + article_link(item.title.encode('utf-8')) + "\003";
-				self.send(chan, tmp.encode('utf-8'));
-				time.sleep(2);
-#			else:
-#				if isIp(item.author):
-#					tmp = u"- Modification de [["+ item.title + u"]] par " + item.author + u" - " + article_link(item.title.encode('utf-8'));
-#					print tmp;
-#					self.act(chan, tmp.encode('utf-8'));
-#					time.sleep(2);
-		old_timestamp1 = timestamp1;
-		
-	def check_new_section(self, page_link):
-		global old_timestamp2;
-		timestamp2 = calendar.timegm(time.gmtime());
-		entries = get_new_entries_atom(page_link, old_timestamp2);
-		conn = httplib.HTTPSConnection("fr.wikipedia.org");
-		for item in entries:
-			conn.request("GET", item.id[24:]);
-			print item.id[24:];
-			result = re.findall('<td class="diff-addedline"><div>==(.+)==.*</div></td>', conn.getresponse().read());
-			if len(result) > 0:
-				if result[0][0] != '=':
-					result[0] = result[0].strip();
-					tmp = u"\00313\002Nouveau sujet sur le Manga café\002\003 par \00303"+item.author+u"\003 : \00310https://fr.wikipedia.org/wiki/Discussion_Projet:Animation_et_bande_dessinée_asiatiques#"+urllib.quote_plus(result[0].replace(" ", "_"))+u"\003";
-					print tmp.encode('utf-8');
-					self.send(chan, tmp.encode('utf-8'));
-					time.sleep(2);
-		old_timestamp2 = timestamp2;
-		
-	def check_new_news(self):
-		global old_timestamp3;
-		timestamp3 = calendar.timegm(time.gmtime());
-
-		entries = get_new_entries_rss(u"http://www.animenewsnetwork.com/news/rss.xml", old_timestamp3);
-		for item in entries:
-			tmp = u"[ANN] "+item.title+u" – http://4nn.cx/"+item.link.split("/")[-1];
-			self.send(chan, tmp.encode('utf-8'));
-
-		entries = get_new_entries_rss(u"http://www.animeland.com/rss/news", old_timestamp3);
-		for item in entries:
-			tmp = u"[Animeland] "+item.title+u" – "+u"/".join(item.link.replace(u" ", u"_").split(u"/")[:-1])+u"/";
-			self.send(chan, tmp.encode('utf-8'));
-
-		old_timestamp3 = timestamp3;
-	
-	def check_type_change(self):
-		global old_timestamp4, r1, r2;
-		timestamp4 = calendar.timegm(time.gmtime());
-		entries = get_new_entries_atom(cat, old_timestamp4);
-		conn = httplib.HTTPSConnection("fr.wikipedia.org");
-		for item in entries:
-			conn.request("GET", u"/w/api.php?format=json&action=query&list=users&usprop=groups&ususers="+item.author.replace(" ", "_"));
-			autopatrolled = False;
-			try:
-				if "autopatrolled" in json.loads(conn.getresponse().read())["query"]["users"][0]["groups"]:
-					autopatrolled = True;
-			except:
-				print "";
-			if not autopatrolled:
-				try:
-					conn.request("GET", u"/w/api.php?action=query&prop=revisions&rvprop=content&rvlimit=2&continue&format=json&titles="+item.title.replace(" ", "_"));
-					revs = json.loads(conn.getresponse().read())["query"]["pages"].itervalues().next()["revisions"]
-					T("Check type change", revs);
-
-					try:
-						type1 = r1.findall(revs[0]["*"])[0].replace("\n", "").strip().lower();
-						type2 = r1.findall(revs[1]["*"])[0].replace("\n", "").strip().lower();
-						if type1 != type2:
-							tmp = item.author+u" a modifié le type de [["+item.title+u"]], de \""+type2+u"\" à \""+type1+u"\" — https://fr.wikipedia.org/wiki/Special:Diff/"+re.sub(".*diff=([0-9]+).*", r"\1", entries[0].id);
-							self.send(chan, tmp.encode('utf-8'));
-					except:
-						print "";
-
-					try:
-						type1 = r2.findall(revs[0]["*"])[0].replace("\n", "").strip().lower();
-						type2 = r2.findall(revs[1]["*"])[0].replace("\n", "").strip().lower();
-						if type1 != type2:
-							tmp = item.author+u" a modifié le type de [["+item.title+u"]], de \""+type2+u"\" à \""+type1+u"\" — https://fr.wikipedia.org/wiki/Special:Diff/"+re.sub(".*diff=([0-9]+).*", r"\1", entries[0].id);
-							self.send(chan, tmp.encode('utf-8'));
-					except:
-						print "";
-				except:
-					print "";
-		old_timestamp4 = timestamp4;
-
-
-
-def T(title, message):
-	try:
-		logfile = open("trace/"+time.strftime('%Y-%m-%d',time.localtime())+".log", "a");
-		logfile.write(time.strftime('%H:%M:%S',time.localtime())+" "+title.encode("utf-8")+"\n=============================================================\n"+message.encode("utf-8")+"\n\n\n\n");
-		logfile.close();
-	except:
-		print "Couldn't trace";
-
-
-# Gestion du temps
-def timestampisation(date):
-	return time.mktime(time.strptime(date,"%Y-%m-%dT%H:%M:%SZ"));
-	
-def timestampisation2(date):
-	tz = int(re.findall("^.+([-+][0-9]{2})[0-9]{2}$", date)[0]);
-	d = re.findall("^[a-zA-Z]+, (.+) [-+][0-9]{4}$", date)[0];
-	return time.mktime(time.strptime(d,"%d %b %Y %H:%M:%S")) - (tz*3600);
-
-# Recuperation de feed rss/atom brut
-def get_entries(link):
-	feed = parse(link);
-	return feed['entries'];
-
-# Recuperation de feed rss
-def get_new_entries_rss(link, old_timestamp):
-	try:
-		feed = get_entries(link);
-	except:
-		print "Unable to get "+link;
-		feed = []
-	entries = [];
-	for item in feed:
-		try:
-			if int(timestampisation2(item.published)) > int(old_timestamp): # Attention, le serveur doit être en UTC
-				entries.append(item);
-		except:
-			print "bad date";
-	return entries;
-
-# Recuperation de feed atom
-def get_new_entries_atom(link, old_timestamp):
-	feed = get_entries(link);
-	entries = [];
-	for item in feed:
-		if int(timestampisation(item.updated)) > int(old_timestamp): # Attention, le serveur doit être en UTC
-			entries.append(item);
-	return entries;
-
-
-# Divers
-def article_link(link):
-	return "https://fr.wikipedia.org/wiki/" + urllib.quote_plus(link.replace(" ", "_")).replace(".$", "%2E");
-
-def isIp(name):
-	if re.search("^[0-9]{1,3}.[0-9]{1,3}.[0-9]{1,3}.[0-9]{1,3}$", name):
-		return True;
-	else:
-		if re.search("^[0-9a-f]{0,4}:[0-9a-f]{0,4}:[0-9a-f]{0,4}:[0-9a-f]{0,4}:[0-9a-f]{0,4}:[0-9a-f]{0,4}:[0-9a-f]{0,4}:[0-9a-f]{0,4}$", name):
-			return True;
-		else:
-			return False;
-
 
 			
 
@@ -341,14 +32,14 @@ def isIp(name):
 
 # Main
 def main():
-	global chan, pseudo, password, server, port, wait;
+	global chan, pseudo, password, server, port, wait, version;
 	reload(sys);
 	sys.setdefaultencoding('utf8');
 	rbk_jisho.get_converttable();
 	(chan,pseudo,password,server,port,wait) = rbk_args.get_args();
 
 	while True:
-		mybot().start();
+		rbk_irc.mybot(server, port, chan, pseudo, password, wait, version).start();
 		time.sleep(30);
 
 
