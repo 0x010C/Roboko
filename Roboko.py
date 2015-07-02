@@ -292,7 +292,7 @@ def T(title, message):
 		logfile.write(time.strftime('%H:%M:%S',time.localtime())+" "+title.encode("utf-8")+"\n=============================================================\n"+message.encode("utf-8")+"\n\n\n\n");
 		logfile.close();
 	except:
-		print "Coudn't trace";
+		print "Couldn't trace";
 
 
 # Gestion du temps
