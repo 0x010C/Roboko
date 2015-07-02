@@ -19,7 +19,7 @@ import urllib;
 import json;
 
 #Paramètres
-version = "1.33"
+version = "1.34"
 chan = "";
 pseudo = "";
 password = "";
@@ -264,15 +264,6 @@ class mybot(ircbot.SingleServerIRCBot):
 					print "";
 		old_timestamp4 = timestamp4;
 
-def T(title, message):
-	try:
-		logfile = open("trace/"+time.strftime('%Y-%m-%d',time.localtime())+".log", "a");
-		logfile.write(time.strftime('%H:%M:%S',time.localtime())+" "+title.encode("utf-8")+"\n=============================================================\n"+message.encode("utf-8")+"\n\n\n\n");
-		logfile.close();
-	except:
-		print "Coudn't trace";
-
-
 	def jisho(self, message):
 		conn = httplib.HTTPConnection("tangorin.com");
 		conn.request("GET", "/general/"+urllib.quote_plus(message));
@@ -293,6 +284,15 @@ def T(title, message):
 			else:
 				return "\00304Introuvable\003";
 
+
+
+def T(title, message):
+	try:
+		logfile = open("trace/"+time.strftime('%Y-%m-%d',time.localtime())+".log", "a");
+		logfile.write(time.strftime('%H:%M:%S',time.localtime())+" "+title.encode("utf-8")+"\n=============================================================\n"+message.encode("utf-8")+"\n\n\n\n");
+		logfile.close();
+	except:
+		print "Coudn't trace";
 
 
 # Gestion du temps
