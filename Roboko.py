@@ -19,7 +19,7 @@ import urllib;
 import json;
 
 #Paramètres
-version = "1.31"
+version = "1.33"
 chan = "";
 pseudo = "";
 password = "";
@@ -81,15 +81,15 @@ class mybot(ircbot.SingleServerIRCBot):
 
 	def on_part(self, serv, ev):
 		if len(ev.arguments()) > 0:
-			self.log("<*> "+irclib.nm_to_n(ev.source())+u" a quité le canal ("+ev.arguments()[0]+u")");
+			self.log("<*> "+irclib.nm_to_n(ev.source())+u" a quitté le canal ("+ev.arguments()[0]+u")");
 		else:
-			self.log("<*> "+irclib.nm_to_n(ev.source())+u" a quité le canal");
+			self.log("<*> "+irclib.nm_to_n(ev.source())+u" a quitté le canal");
 
 	def on_quit(self, serv, ev):
 		if len(ev.arguments()) > 0:
-			self.log("<*> "+irclib.nm_to_n(ev.source())+u" a quité le serveur ("+ev.arguments()[0]+u")");
+			self.log("<*> "+irclib.nm_to_n(ev.source())+u" a quitté le serveur ("+ev.arguments()[0]+u")");
 		else:
-			self.log("<*> "+irclib.nm_to_n(ev.source())+u" a quité le serveur");
+			self.log("<*> "+irclib.nm_to_n(ev.source())+u" a quitté le serveur");
 
 	def on_kick(self, serv, ev):
 		self.log("<*> "+irclib.nm_to_n(ev.source())+u" a expulsé "+ev.arguments()[0]+u" ("+ev.arguments()[1]+u")");
@@ -150,7 +150,7 @@ class mybot(ircbot.SingleServerIRCBot):
 		if re.search("^!j .+", message):
 			self.send(canal, self.jisho(message[3:]));
 		if (re.search(u"^!exit", message) or re.search(u"^!stop", message)) and self.channels[chan].is_oper(author):
-			self.send(chan, u"\002\00304STOPPED\003\002")
+			self.send(chan, u"\002\00304oyasumi~\003\002")
 			sys.exit()
 		elif (re.search(u"^!exit", message) or re.search(u"^!stop", message)) and not self.channels[chan].is_oper(author):
 			self.send_notice(author, u"Vous n'avez pas les droits nécessaires pour me stopper. En cas de dysfonctionnement, vous pouvez contacter Thibaut120094 ou kiwi_0x010C.")
@@ -161,7 +161,7 @@ class mybot(ircbot.SingleServerIRCBot):
 			logfile.write(time.strftime('%H:%M:%S',time.localtime())+" "+message.encode("utf-8")+"\n");
 			logfile.close();
 		except:
-			print "Coudn't log a message";
+			print "Couldn't log a message";
 
 	def checker(self):
 		print "### Checker";
