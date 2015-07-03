@@ -2,6 +2,7 @@
 
 import time;
 import re;
+import urllib;
 
 
 def T(title, message):
@@ -23,3 +24,7 @@ def isIp(name):
 			return True;
 		else:
 			return False;
+			
+
+def article_link(link):
+	return "https://fr.wikipedia.org/wiki/" + urllib.quote_plus(link.replace(" ", "_")).replace(".$", "%2E");

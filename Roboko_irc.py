@@ -9,6 +9,10 @@ import re;
 import Roboko_utils as rbk_utils;
 import Roboko_feed as rbk_feed;
 import Roboko_jisho as rbk_jisho;
+import Roboko_checkarticle as rbk_ca;
+import Roboko_checknews as rbk_cn;
+import Roboko_checksection as rbk_cs;
+import Roboko_checktypechange as rbk_ctc;
 
 
 
@@ -145,9 +149,8 @@ class mybot(ircbot.SingleServerIRCBot):
 			print "Couldn't log a message";
 
 	def checker(self):
-		print "### Checker";
-		rbk_feed.check_new_article(self, cat);
-		rbk_feed.check_new_section(self, page);
-		rbk_feed.check_type_change(self, cat);
-		#self.check_new_news(); #Affichage des news désactivé
+		rbk_ca.check_new_article(self, cat);
+		rbk_cs.check_new_section(self, page);
+		rbk_ctc.check_type_change(self, cat);
+
 		self.saveServ.execute_delayed(self.wait, self.checker);
