@@ -43,7 +43,7 @@ def get_new_entries_rss(link, old_timestamp):
 	entries = [];
 	for item in feed:
 		try:
-			if int(timestampisation2(item.published)) > int(old_timestamp)-2*3600: # Attention, le serveur doit être en UTC
+			if int(timestampisation2(item.published)) > int(old_timestamp): # Attention, le serveur doit être en UTC
 				entries.append(item);
 		except:
 			print "bad date";
@@ -54,7 +54,7 @@ def get_new_entries_atom(link, old_timestamp):
 	feed = get_entries(link);
 	entries = [];
 	for item in feed:
-		if int(timestampisation(item.updated)) > int(old_timestamp)-2*3600: # Attention, le serveur doit être en UTC
+		if int(timestampisation(item.updated)) > int(old_timestamp): # Attention, le serveur doit être en UTC
 			entries.append(item);
 	return entries;
 
