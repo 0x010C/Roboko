@@ -8,6 +8,7 @@ import calendar;
 import datetime;
 import httplib;
 
+import Roboko_utils as rbk_utils;
 
 old_timestamp1 = calendar.timegm(time.gmtime());
 old_timestamp2 = calendar.timegm(time.gmtime());
@@ -93,8 +94,8 @@ def check_new_section(irc, page_link):
 	global old_timestamp2;
 	timestamp2 = calendar.timegm(time.gmtime());
 	entries = get_new_entries_atom(page_link, old_timestamp2);
-	conn = httplib.HTTPSConnection("fr.wikipedia.org");
 	for item in entries:
+		conn = httplib.HTTPSConnection("fr.wikipedia.org");
 		conn.request("GET", item.id[24:]);
 		print item.id[24:];
 		result = re.findall('<td class="diff-addedline"><div>==(.+)==.*</div></td>', conn.getresponse().read());
@@ -127,8 +128,8 @@ def check_type_change(irc, cat):
 	global old_timestamp4, r1, r2;
 	timestamp4 = calendar.timegm(time.gmtime());
 	entries = get_new_entries_atom(cat, old_timestamp4);
-	conn = httplib.HTTPSConnection("fr.wikipedia.org");
 	for item in entries:
+		conn = httplib.HTTPSConnection("fr.wikipedia.org");
 		conn.request("GET", u"/w/api.php?format=json&action=query&list=users&usprop=groups&ususers="+item.author.replace(" ", "_"));
 		autopatrolled = False;
 		try:
@@ -138,9 +139,10 @@ def check_type_change(irc, cat):
 			print "";
 		if not autopatrolled:
 			try:
+				conn = httplib.HTTPSConnection("fr.wikipedia.org");
 				conn.request("GET", u"/w/api.php?action=query&prop=revisions&rvprop=content&rvlimit=2&continue&format=json&titles="+item.title.replace(" ", "_"));
 				revs = json.loads(conn.getresponse().read())["query"]["pages"].itervalues().next()["revisions"]
-				T("Check type change", revs);
+				rbk_utils.T("Check type change", revs);
 
 				try:
 					type1 = r1.findall(revs[0]["*"])[0].replace("\n", "").strip().lower();

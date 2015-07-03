@@ -7,7 +7,7 @@ import re;
 def T(title, message):
 	try:
 		tracefile = open("trace/"+time.strftime('%Y-%m-%d',time.localtime())+".log", "a");
-		tracefile.write(time.strftime('%H:%M:%S',time.localtime())+" "+title.encode("utf-8")+"\n=============================================================\n"+message.encode("utf-8")+"\n\n\n\n");
+		tracefile.write(time.strftime('%H:%M:%S',time.localtime())+"> "+title.encode("utf-8")+"\n=============================================================\n"+message.encode("utf-8")+"\n\n\n\n");
 		tracefile.close();
 	except:
 		print "Couldn't trace";
