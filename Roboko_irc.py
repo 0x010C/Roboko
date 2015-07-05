@@ -123,9 +123,9 @@ class mybot(ircbot.SingleServerIRCBot):
 			output = "";
 			for link in links:
 				if output == "":
-					newoutput = article_link(link.strip());
+					newoutput = rbk_utils.article_link(link.strip());
 				else:
-					newoutput = output + " - " + article_link(link.strip());
+					newoutput = output + " - " + rbk_utils.article_link(link.strip());
 				if len(newoutput) > 340:
 					break;
 				output = newoutput;
