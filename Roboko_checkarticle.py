@@ -13,7 +13,7 @@ def check_new_article(irc, cat):
 	entries = rbk_feed.get_new_entries_atom(cat, old_timestamp);
 	for item in entries:
 		if re.search("\n<p><b>Nouvelle page</b></p>", item.summary):
-			tmp = u"\00313\002Nouvel article\002\003 : [[\00307"+ item.title + u"\003]] – \00310" + article_link(item.title.encode('utf-8')) + "\003";
+			tmp = u"\00313\002Nouvel article\002\003 : [[\00307"+ item.title + u"\003]] – \00310" + rbk_utils.article_link(item.title.encode('utf-8')) + "\003";
 			irc.send(irc.chan, tmp.encode('utf-8'));
 			time.sleep(2);
 #			else:
