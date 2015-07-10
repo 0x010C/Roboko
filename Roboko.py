@@ -12,6 +12,7 @@ import json;
 # Roboko
 import Roboko_args as rbk_args;
 import Roboko_jisho as rbk_jisho;
+import Roboko_seen as rbk_seen;
 import Roboko_irc as rbk_irc;
 
 #Paramètres
@@ -36,6 +37,7 @@ def main():
 	reload(sys);
 	sys.setdefaultencoding('utf8');
 	rbk_jisho.get_converttable();
+	rbk_seen.init();
 	(chan,pseudo,password,server,port,wait) = rbk_args.get_args();
 
 	while True:

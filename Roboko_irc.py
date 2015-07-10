@@ -9,6 +9,8 @@ import re;
 import Roboko_utils as rbk_utils;
 import Roboko_feed as rbk_feed;
 import Roboko_jisho as rbk_jisho;
+import Roboko_seen as rbk_seen;
+
 import Roboko_checkarticle as rbk_ca;
 import Roboko_checknews as rbk_cn;
 import Roboko_checksection as rbk_cs;
@@ -49,6 +51,7 @@ class mybot(ircbot.SingleServerIRCBot):
 		if canal == self.chan:
 			self.log("<"+author+"> "+message);
 		self.command(author, canal, message);
+		rbk_seen.save(irclib.nm_to_n(author), u"envoi d'un message");
 
 	def on_action(self, serv, ev):
 		author = irclib.nm_to_n(ev.source());
@@ -57,27 +60,34 @@ class mybot(ircbot.SingleServerIRCBot):
 		if canal == self.chan:
 			self.log("<"+author+"> "+author+" "+message);
 		self.command(author, canal, message);
+		rbk_seen.save(irclib.nm_to_n(author), u"envoi d'un message");
 
 	def on_nick(self, serv, ev):
 		self.log("<*> "+irclib.nm_to_n(ev.source())+u" s'appelle à présent "+ev.target());
 
 	def on_join(self, serv, ev):
 		self.log("<*> "+irclib.nm_to_n(ev.source())+u" a rejoint le canal");
+		rbk_seen.save(irclib.nm_to_n(ev.source()), u"join");
 
 	def on_part(self, serv, ev):
 		if len(ev.arguments()) > 0:
 			self.log("<*> "+irclib.nm_to_n(ev.source())+u" a quitté le canal ("+ev.arguments()[0]+u")");
+			rbk_seen.save(irclib.nm_to_n(ev.source()), u"quit ("+ev.arguments()[0]+u")");
 		else:
 			self.log("<*> "+irclib.nm_to_n(ev.source())+u" a quitté le canal");
+			rbk_seen.save(irclib.nm_to_n(ev.source()), u"quit");
 
 	def on_quit(self, serv, ev):
 		if len(ev.arguments()) > 0:
 			self.log("<*> "+irclib.nm_to_n(ev.source())+u" a quitté le serveur ("+ev.arguments()[0]+u")");
+			rbk_seen.save(irclib.nm_to_n(ev.source()), u"quit ("+ev.arguments()[0]+u")");
 		else:
 			self.log("<*> "+irclib.nm_to_n(ev.source())+u" a quitté le serveur");
+			rbk_seen.save(irclib.nm_to_n(ev.source()), u"quit");
 
 	def on_kick(self, serv, ev):
 		self.log("<*> "+irclib.nm_to_n(ev.source())+u" a expulsé "+ev.arguments()[0]+u" ("+ev.arguments()[1]+u")");
+		rbk_seen.save(ev.arguments()[0], u"kick ("+ev.arguments()[1]+u")");
 
 	def on_mode(self, serv, ev):
 		self.log("<*> "+irclib.nm_to_n(ev.source())+u" a modifié des modes : "+" ".join(ev.arguments()));
@@ -112,6 +122,7 @@ class mybot(ircbot.SingleServerIRCBot):
 			self.send(author, "Commandes disponibles :");
 			self.send(author, "!help : affiche ce message d'aide");
 			self.send(author, "!jisho : tranduit et transcrit un mot japonais");
+			self.send(author, "!seen : indique quand a été aperçu un utilisateur pour la dernière fois");
 			self.send(author, "[[lien interne WP]] : traduit un lien interne en url");
 			self.send(author, "Annonce les nouveaux articles du Portail:ABDA");
 			self.send(author, "Annonce les nouveaux sujets sur le Manga café");
@@ -123,9 +134,9 @@ class mybot(ircbot.SingleServerIRCBot):
 			output = "";
 			for link in links:
 				if output == "":
-					newoutput = article_link(link.strip());
+					newoutput = rbk_utils.article_link(link.strip());
 				else:
-					newoutput = output + " - " + article_link(link.strip());
+					newoutput = output + " - " + rbk_utils.article_link(link.strip());
 				if len(newoutput) > 340:
 					break;
 				output = newoutput;
@@ -134,6 +145,8 @@ class mybot(ircbot.SingleServerIRCBot):
 			self.send(canal, rbk_jisho.translate(message[7:]));
 		if re.search("^!j .+", message):
 			self.send(canal, rbk_jisho.translate(message[3:]));
+		if re.search("^!seen .+", message):
+			self.send(canal, rbk_seen.get(self, message[6:]));
 		if (re.search(u"^!exit", message) or re.search(u"^!stop", message)) and self.channels[self.chan].is_oper(author):
 			self.send(self.chan, u"\002\00304oyasumi~\003\002")
 			sys.exit()
