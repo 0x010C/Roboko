@@ -18,10 +18,4 @@ def check_new_article(irc, cat):
 			tmp = u"\00313\002Nouvel article\002\003 : [[\00307"+ item.title + u"\003]] – \00310" + rbk_utils.article_link(item.title.encode('utf-8')) + "\003";
 			irc.send(irc.chan, tmp.encode('utf-8'));
 			time.sleep(2);
-#			else:
-#				if isIp(item.author):
-#					tmp = u"- Modification de [["+ item.title + u"]] par " + item.author + u" - " + article_link(item.title.encode('utf-8'));
-#					print tmp;
-#					irc.act(irc.chan, tmp.encode('utf-8'));
-#					time.sleep(2);
 	old_timestamp = timestamp;
