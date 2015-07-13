@@ -30,6 +30,6 @@ def get(irc, user):
 	if user in irc.channels[irc.chan].users():
 		return u"Regarde mieux, " + user + " est sur le chan ;)"
 	if user in seentable:
-		return user + u" a été aperçu pour la dernière fois il y a " + rbk_utils.timestampToInterval(seentable[user]["timestamp"]) + ", le " + rbk_utils.timestampToDate(seentable[user]["timestamp"]) + " (" + seentable[user]["message"] + ")";
+		return user + u" a été aperçu pour la dernière fois il y a " + rbk_utils.timestampToInterval(seentable[user]["timestamp"]+(3600*TIMEZONE)) + ", le " + rbk_utils.timestampToDate(seentable[user]["timestamp"]+(3600*TIMEZONE)) + " (" + seentable[user]["message"] + ")";
 	else:
 		return u"Je n'ai jamais vu cet utiliateur...";
