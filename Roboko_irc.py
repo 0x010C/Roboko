@@ -145,6 +145,8 @@ class mybot(ircbot.SingleServerIRCBot):
 			self.send(canal, rbk_jisho.translate(message[7:]));
 		if re.search("^!j .+", message):
 			self.send(canal, rbk_jisho.translate(message[3:]));
+		if re.search("^!macrons", message):
+                        self.send(self.chan, u"Ā ā Ē ē Ī ī Ō ō Ū ū")
 		if re.search("^!seen .+", message):
 			self.send(canal, rbk_seen.get(self, message[6:]));
 		if (re.search(u"^!exit", message) or re.search(u"^!stop", message)) and self.channels[self.chan].is_oper(author):
