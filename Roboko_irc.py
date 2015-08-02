@@ -7,14 +7,10 @@ import time;
 import re;
 
 import Roboko_utils as rbk_utils;
-import Roboko_feed as rbk_feed;
 import Roboko_jisho as rbk_jisho;
 import Roboko_seen as rbk_seen;
 
-import Roboko_checkarticle as rbk_ca;
-import Roboko_checknews as rbk_cn;
-import Roboko_checksection as rbk_cs;
-import Roboko_checktypechange as rbk_ctc;
+import Roboko_recentchanges as rbk_rc;
 
 
 
@@ -28,6 +24,7 @@ page = "https://fr.wikipedia.org/w/index.php?title=Discussion_Projet:Animation_e
 class mybot(ircbot.SingleServerIRCBot):
 	def __init__(self, server, port, chan, pseudo, password, wait, version):
 		self.chan = chan;
+		self.pseudo = pseudo;
 		self.password = password;
 		self.wait = wait;
 		self.version = version;
@@ -39,6 +36,7 @@ class mybot(ircbot.SingleServerIRCBot):
 			self.send("nickserv", "identify " + self.password);
 			time.sleep(10);
 		serv.join(self.chan);
+		rbk_rc.init(self, self.pseudo);
 		self.checker();
 
 	def on_privnotice(self, serv, ev):
@@ -52,6 +50,9 @@ class mybot(ircbot.SingleServerIRCBot):
 			self.log("<"+author+"> "+message);
 		self.command(author, canal, message);
 		rbk_seen.save(irclib.nm_to_n(author), u"envoi d'un message");
+
+	def on_privmsg(self, serv, ev):
+		self.on_pubmsg(serv, ev);
 
 	def on_action(self, serv, ev):
 		author = irclib.nm_to_n(ev.source());
@@ -146,7 +147,7 @@ class mybot(ircbot.SingleServerIRCBot):
 		if re.search("^!j .+", message):
 			self.send(canal, rbk_jisho.translate(message[3:]));
 		if re.search("^!macrons", message):
-                        self.send(self.chan, u"Ā ā Ē ē Ī ī Ō ō Ū ū")
+			self.send(self.chan, u"Ā ā Ē ē Ī ī Ō ō Ū ū")
 		if re.search("^!seen .+", message):
 			self.send(canal, rbk_seen.get(self, message[6:]));
 		if (re.search(u"^!exit", message) or re.search(u"^!stop", message)) and self.channels[self.chan].is_oper(author):
@@ -164,8 +165,5 @@ class mybot(ircbot.SingleServerIRCBot):
 			print "Couldn't log a message";
 
 	def checker(self):
-		rbk_ca.check_new_article(self, cat);
-		rbk_cs.check_new_section(self, page);
-		rbk_ctc.check_type_change(self, cat);
-
-		self.saveServ.execute_delayed(self.wait, self.checker);
+		rbk_rc.process_once();
+		self.saveServ.execute_delayed(1, self.checker);

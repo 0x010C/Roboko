@@ -47,7 +47,7 @@ def get_new_entries_atom(link, old_timestamp):
 	feed = get_entries(link);
 	entries = [];
 	for item in feed:
-		if int(timestampisation(item.updated)) > int(old_timestamp): # Attention, le serveur doit être en UTC
+		if int(timestampisation(item.updated)) > int(old_timestamp)-(2*3600): # Attention, le serveur doit être en UTC
 			entries.append(item);
 	return entries;
 

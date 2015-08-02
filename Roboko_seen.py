@@ -13,7 +13,6 @@ def init():
 	global seentable;
 	try:
 		seentable = pickle.load(open("log/seen.log", "r"));
-		print seentable;
 	except:
 		seentable = {};
 		pickle.dump(seentable, open("log/seen.log", "w"));
