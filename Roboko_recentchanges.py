@@ -103,6 +103,7 @@ def isOnRevision(oldid, regex, retry=0):
 			return isOnRevision(oldid, regex, retry+1)
 		else:
 			print "\n3 HTTP errors had occured in isOnRevision\n"
+			return None
 	return False
 
 def isAutopatrolled(user, retry=0):
@@ -150,6 +151,7 @@ def analyse(serv, ev, retry=0):
 	N = " "
 	P = " "
 	oldid = "0"
+	print message;
 
 	#Pour les articles, et les articles uniquement
 	if not title.split(":")[0] in IGNORED_NAMESPACE:
@@ -176,7 +178,7 @@ def analyse(serv, ev, retry=0):
 					irc_send.send(irc_send.chan, author+u" a modifié le type de [["+title+u"]], de \""+oldtype+u"\" à \""+newtype+u"\" — https://fr.wikipedia.org/w/index.php?diff="+oldid)
 					N = "C"
 			#Informe des nouveaux portails abda posés
-			if not isOnRevision(prev_oldid, r_abda_portal):
+			if isOnRevision(prev_oldid, r_abda_portal) == False:
 				irc_send.send(irc_send.chan, author+u" a ajouté le portail abda à l'article [["+title+u"]] — https://fr.wikipedia.org/w/index.php?diff="+oldid)
 				P = "A"
 		elif P != "P" and N != "N":
