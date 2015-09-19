@@ -82,11 +82,11 @@ def isPartOfProject(title, project, retry=0):
 					return True
 					break
 	except:
-		if retry < 2:
+		if retry < 4:
 			conn = httplib.HTTPSConnection("fr.wikipedia.org")
 			return isPartOfProject(title, project, retry+1)
 		else:
-			print "\n3 HTTP errors had occured in isPartOfProject\n"
+			print "\n5 HTTP errors had occured in isPartOfProject\n"
 	return False
 
 
@@ -98,11 +98,11 @@ def isOnRevision(oldid, regex, retry=0):
 		if regex.search(content):
 			return True
 	except:
-		if retry < 2:
+		if retry < 4:
 			conn = httplib.HTTPSConnection("fr.wikipedia.org")
 			return isOnRevision(oldid, regex, retry+1)
 		else:
-			print "\n3 HTTP errors had occured in isOnRevision\n"
+			print "\n5 HTTP errors had occured in isOnRevision\n"
 			return None
 	return False
 
@@ -115,11 +115,11 @@ def isAutopatrolled(user, retry=0):
 		if "autopatrolled" in json.loads(conn.getresponse().read())["query"]["users"][0]["groups"]:
 			return True
 	except:
-		if retry < 2:
+		if retry < 4:
 			conn = httplib.HTTPSConnection("fr.wikipedia.org")
 			return isAutopatrolled(user, retry+1)
 		else:
-			print "\n3 HTTP errors had occured in isAutopatrolled\n"
+			print "\n5 HTTP errors had occured in isAutopatrolled\n"
 	return False
 
 def hasTypeChanged(title, oldid, prev_oldid, retry=0):
@@ -136,11 +136,11 @@ def hasTypeChanged(title, oldid, prev_oldid, retry=0):
 				if oldtype != newtype:
 					return (True, oldtype, newtype)
 	except:
-		if retry < 2:
+		if retry < 4:
 			conn = httplib.HTTPSConnection("fr.wikipedia.org")
 			return hasTypeChanged(title, oldid, prev_oldid, retry+1)
 		else:
-			print "\n3 HTTP errors had occured in hasTypeChanged\n"
+			print "\n5 HTTP errors had occured in hasTypeChanged\n"
 	return (False, "", "")
 
 
@@ -156,14 +156,16 @@ def analyse(serv, ev, retry=0):
 	#Pour les articles, et les articles uniquement
 	if not title.split(":")[0] in IGNORED_NAMESPACE:
 		author = r_author.findall(message)[0]
-		isAutopatrolled(author)
 		if r_newpage.search(message):
 			N = "N"
 			oldid = r_prev_oldid.findall(message)[0]
 		else:
 			oldid = r_oldid.findall(message)[0]
-		if isOnRevision(oldid, r_abda_portal): #isPartOfProject(title, "Animation et bande dessinée asiatiques"):
+		onrevision = isOnRevision(oldid, r_abda_portal)
+		if onrevision == True: #isPartOfProject(title, "Animation et bande dessinée asiatiques"):
 			P = "P"
+		elif onrevision == False:
+			P = "_"
 
 		#Informe des nouveaux articles
 		if P == "P" and N == "N":
@@ -181,7 +183,7 @@ def analyse(serv, ev, retry=0):
 			if isOnRevision(prev_oldid, r_abda_portal) == False:
 				irc_send.send(irc_send.chan, author+u" a ajouté le portail abda à l'article [["+title+u"]] — https://fr.wikipedia.org/w/index.php?diff="+oldid)
 				P = "A"
-		elif P != "P" and N != "N":
+		elif P == "_" and N != "N":
 			prev_oldid = r_prev_oldid.findall(message)[0]
 			#Informe des portails abda retirés
 			if isOnRevision(prev_oldid, r_abda_portal):

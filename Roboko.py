@@ -16,7 +16,7 @@ import Roboko_seen as rbk_seen
 import Roboko_irc as rbk_irc
 
 #Paramètres
-version = "2.01"
+version = "2.02"
 
 chan = ""
 pseudo = ""
