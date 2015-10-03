@@ -7,6 +7,7 @@ import re
 
 
 converttable = []
+prev_translation = ""
 
 def get_converttable():
 	global converttable
@@ -21,25 +22,50 @@ def get_converttable():
 		if len(tmp) >= 2:
 			converttable.append(tmp)
 
-def translate(message):
-		conn = httplib.HTTPConnection("tangorin.com")
-		conn.request("GET", "/general/"+urllib.quote_plus(message))
-		result = re.findall('<div class="entry"><a class="btn btn-link entry-menu" onclick="entryMenu\(this,\{\n([\s\S]+)</div>', conn.getresponse().read())
-		if len(result) > 0:
-			result = result[0].split("\">")[0].split("\n")[2:6]
-			for line in result:
-				line = line.split(":")[1]
-			kanji = re.findall("'(.*)'",result[0])[0]
-			kana = re.findall("'(.*)'",result[1])[0].split("・")[0]
-			trad = re.findall("'(.*)'",result[3])[0].replace("<ol>", "").replace("</ol>", "").replace("</li><li>", " - ").replace("<li>", "").replace("</li>", "").replace("\\", "")
-			output = "\00313" + kanji + "\003[\00305" + kana + "\003, \00307" + kana2romaji(kana) + "\003] --> \003" + trad + "\003"
-			return output.encode('utf-8')
-		else:
-			trad = kana2romaji(message)
-			if trad != message:
-				return "\00304Introuvable, tentative de transcription\003 : " + trad
-			else:
-				return "\00304Introuvable\003"
+def translate(message, split=False):
+	global prev_translation
+
+	if split or message == prev_translation:
+		return translate_word_by_word(message)
+
+	prev_translation = message
+	return translate_all(message)
+
+def translate_all(message, split=False):
+	conn = httplib.HTTPConnection("tangorin.com")
+	conn.request("GET", "/general/"+urllib.quote_plus(message))
+	result = re.findall('<div class="entry"><a class="btn btn-link entry-menu" onclick="entryMenu\(this,\{\n([\s\S]+)</div>', conn.getresponse().read())
+	if len(result) > 0:
+		result = result[0].split("\">")[0].split("\n")[2:6]
+		for line in result:
+			line = line.split(":")[1]
+		kanji = re.findall("'(.*)'",result[0])[0]
+		kana = re.findall("'(.*)'",result[1])[0].split("・")[0]
+		trad = re.findall("'(.*)'",result[3])[0].replace("<ol>", "").replace("</ol>", "").replace("</li><li>", " - ").replace("<li>", "").replace("</li>", "").replace("\\", "")
+		output = "\00313" + kanji + "\003[\00305" + kana + "\003, \00307" + kana2romaji(kana) + "\003] --> \003" + trad + "\003"
+		return output.encode('utf-8')
+
+	trad = kana2romaji(message)
+	if trad != message and not split:
+		return "\00304Introuvable, tentative de transcription\003 : " + trad
+
+	return "\00304Introuvable\003"
+
+def translate_word_by_word(message):
+	words = message.split(" ")
+	if len(words) < 2:
+		return translate(message)
+
+	trad = kana2romaji(message)
+	result = ""
+	if trad != message:
+		result = "\00303\002Transcription globale :\002\003 " + trad + "\n"
+	result += "\00303\002Traduction mot par mot :\002\003"
+	for word in words:
+		result += "\n" + word + " : " + translate(word, True)
+
+	return result
+
 
 def kana2romaji(kana):
 	for line in converttable:

@@ -5,6 +5,7 @@ import irclib
 import ircbot
 import time
 import re
+import sys
 
 import Roboko_utils as rbk_utils
 import Roboko_jisho as rbk_jisho
@@ -145,9 +146,17 @@ class mybot(ircbot.SingleServerIRCBot):
 				output = newoutput
 			self.send(canal, output)
 		if re.search("^!jisho .+", message):
-			self.send(canal, rbk_jisho.translate(message[7:]))
+			lines = rbk_jisho.translate(message[7:]).split("\n")
+			for line in lines:
+				self.send(canal, line)
 		if re.search("^!j .+", message):
-			self.send(canal, rbk_jisho.translate(message[3:]))
+			lines = rbk_jisho.translate(message[3:]).split("\n")
+			for line in lines:
+				self.send(canal, line)
+		if re.search("^!jw .+", message):
+			lines = rbk_jisho.translate_word_by_word(message[4:]).split("\n")
+			for line in lines:
+				self.send(canal, line)
 		if re.search("^!macrons", message):
 			self.send(self.chan, u"Ā ā Ē ē Ī ī Ō ō Ū ū")
 		if re.search("^!seen .+", message):
