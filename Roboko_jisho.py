@@ -25,6 +25,8 @@ def get_converttable():
 def translate(message, split=False):
 	global prev_translation
 
+	message = message.strip(' \t\n\r')
+
 	if split or message == prev_translation:
 		return translate_word_by_word(message)
 
