@@ -205,7 +205,7 @@ def analyse(serv, ev, retry=0):
 			author = r_author.findall(message)[0]
 			if isPartOfProject(newtitle, "Animation et bande dessinée asiatiques"):
 				P = "P"
-				irc_send.send(irc_send.chan, u"\00313\002Article renommé\002\003 : la page [[\00307"+ oldtitle + u"\003]] a été déplacé vers [[\00307"+ newtitle + u"\003]] par \00303"+author+u"\003" + summary + u" – \00310" + rbk_utils.article_link(newtitle.encode('utf-8')) + "\003")
+				irc_send.send(irc_send.chan, u"\00313\002Article renommé\002\003 : la page [[\00307"+ oldtitle + u"\003]] a été déplacée vers [[\00307"+ newtitle + u"\003]] par \00303"+author+u"\003" + summary + u" – \00310" + rbk_utils.article_link(newtitle.encode('utf-8')) + "\003")
 			print "M" + P + "  " + author + " a déplacé la page [[" + oldtitle + "]] vers [[" + newtitle + "]]"
 
 	#Informe des nouveaux messages sur le manga café
