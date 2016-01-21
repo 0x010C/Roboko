@@ -27,7 +27,7 @@ def get(irc, user):
 	user = user.split(" ")[0]
 	print "#"+user+"#"
 	if user in irc.channels[irc.chan].users():
-		return u"Regarde mieux, " + user + " est sur le chan )"
+		return u"Regarde mieux, " + user + " est sur le chan :)"
 	if user in seentable:
 		return user + u" a été aperçu pour la dernière fois il y a " + rbk_utils.timestampToInterval(seentable[user]["timestamp"]) + ", le " + rbk_utils.timestampToDate(seentable[user]["timestamp"]+(3600*TIMEZONE)) + " (" + seentable[user]["message"] + ")"
 	else:
