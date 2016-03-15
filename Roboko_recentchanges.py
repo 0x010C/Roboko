@@ -55,19 +55,29 @@ r_abda_portal = re.compile(u"\{\{[Pp]ortail.+([Aa]nimation et bande dessinée as
 conn = httplib.HTTPSConnection("fr.wikipedia.org")
 irc_rcv = None
 irc_send = None
+pseudo = ""
+time_last_message = time.time()
+timeout = 75
 
 
-def init(mainirc, pseudo):
-	global irc_rcv, irc_send
+def init(mainirc, _pseudo):
+	global irc_send, pseudo
 	irc_send = mainirc
+	pseudo = _pseudo
+	connect()
+	
+
+def connect():
+	global irc_rcv, pseudo, time_last_message
 	irc_rcv = irclib.IRC()
 	server = irc_rcv.server()
-	server.connect("irc.wikimedia.org", 6667, pseudo, ssl=False)
-	server.join("#fr.wikipedia")
-	irc_rcv.add_global_handler("pubmsg", analyse, -10)
-
-
-
+	try:
+		server.connect("irc.wikimedia.org", 6667, pseudo, ssl=False)
+		server.join("#fr.wikipedia")
+		irc_rcv.add_global_handler("pubmsg", analyse, -10)
+		time_last_message = time.time()
+	except:
+		print "\033[1;31mUnsuccessful connexion to irc.wikimedia.org:6667 :(\033[0m"
 
 
 def isPartOfProject(title, project, retry=0):
@@ -145,7 +155,8 @@ def hasTypeChanged(title, oldid, prev_oldid, retry=0):
 
 
 def analyse(serv, ev, retry=0):
-	global conn, irc_send
+	global conn, irc_send, time_last_message
+	time_last_message = time.time()
 	message = ev.arguments()[0]
 	title = r_title.findall(message)[0]
 	N = " "
@@ -223,3 +234,6 @@ def analyse(serv, ev, retry=0):
 
 def process_once():
 	irc_rcv.process_once(0.2)
+	if time.time()-time_last_message > timeout:
+		irc_rcv.disconnect_all()
+		connect()
