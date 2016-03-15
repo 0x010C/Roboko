@@ -18,7 +18,7 @@ def get_converttable():
 	contenu = fichier.read()
 	lines = contenu.split("\n")
 	for line in lines:
-		tmp = line.split("\t")
+		tmp = line.decode("utf8").split("\t")
 		if len(tmp) >= 2:
 			converttable.append(tmp)
 
