@@ -22,12 +22,12 @@ def get_converttable():
 		if len(tmp) >= 2:
 			converttable.append(tmp)
 
-def translate(message, split=False):
+def translate(message):
 	global prev_translation
 
 	message = message.strip(' \t\n\r')
 
-	if split or message == prev_translation:
+	if message == prev_translation:
 		return translate_word_by_word(message)
 
 	prev_translation = message
@@ -55,8 +55,9 @@ def translate_all(message, split=False):
 
 def translate_word_by_word(message):
 	words = message.split(" ")
+	print len(words)
 	if len(words) < 2:
-		return translate(message)
+		return translate_all(message)
 
 	trad = kana2romaji(message)
 	result = ""
@@ -64,7 +65,7 @@ def translate_word_by_word(message):
 		result = "\00303\002Transcription globale :\002\003 " + trad + "\n"
 	result += "\00303\002Traduction mot par mot :\002\003"
 	for word in words:
-		result += "\n" + word + " : " + translate(word, True)
+		result += "\n" + word + " : " + translate_all(word, True)
 
 	return result
 
