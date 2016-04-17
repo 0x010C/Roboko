@@ -8,7 +8,7 @@ def parse_config_file():
 	chan = "";
 	pseudo = "";
 	password = "";
-	server = "verne.freenode.net";
+	server = "chat.freenode.net";
 	port = 6697;
 	wait = 300;
 
