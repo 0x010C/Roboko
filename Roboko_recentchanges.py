@@ -180,7 +180,7 @@ def analyse(serv, ev, retry=0):
 
 		#Informe des nouveaux articles
 		if P == "P" and N == "N":
-			irc_send.send(irc_send.chan, u"\00313\002Nouvel article\002\003 : [[\00307"+ title + u"\003]] – \00310" + rbk_utils.article_link(title.encode('utf-8')) + "\003")
+			irc_send.send(irc_send.chan, u"\00313\002Nouvel article\002\003 : [[\00307"+ title + u"\003]] par " + author + u" – \00310" + rbk_utils.article_link(title.encode('utf-8')) + "\003")
 		
 		if P == "P" and N != "N":
 			prev_oldid = r_prev_oldid.findall(message)[0]
